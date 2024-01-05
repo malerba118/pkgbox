@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "../components/ui/button";
 import { ProjectManager } from "../state/app";
 import { nanoid } from "nanoid";
+import { removeForwardSlashes } from "../lib/utils";
 
 const project = new ProjectManager({ id: nanoid(), name: "project" });
 

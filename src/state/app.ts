@@ -1,6 +1,7 @@
 import { computed, makeObservable, observable, values } from "mobx";
 import { AppFile, AppFolder, AppNode, Project } from "./types";
 import { nanoid } from "nanoid";
+import { removeForwardSlashes } from "../lib/utils";
 
 class NodeManager {
   id: string;
@@ -85,12 +86,6 @@ class AppManager {
 
   constructor(data: App, project: ProjectManager) {
     this.project = project;
-    data.files.forEach((file) => {
-      this.filesById[file.id] = new FileManager(file, this);
-    });
-    data.folders.forEach((folder) => {
-      this.foldersById[folder.id] = new FolderManager(folder, this);
-    });
     this.foldersById["root"] = new FolderManager(
       {
         id: "root",
@@ -101,6 +96,12 @@ class AppManager {
       },
       this
     );
+    data.files.forEach((file) => {
+      this.filesById[file.id] = new FileManager(file, this);
+    });
+    data.folders.forEach((folder) => {
+      this.foldersById[folder.id] = new FolderManager(folder, this);
+    });
     makeObservable(this, {
       filesById: observable.shallow,
       foldersById: observable.shallow,
@@ -123,6 +124,7 @@ class AppManager {
     hidden?: boolean;
     read_only?: boolean;
   }) {
+    name = removeForwardSlashes(name);
     const file = new FileManager(
       {
         id: nanoid(),
@@ -151,6 +153,7 @@ class AppManager {
     hidden?: boolean;
     read_only?: boolean;
   }) {
+    name = removeForwardSlashes(name);
     const folder = new FolderManager(
       {
         id: nanoid(),
