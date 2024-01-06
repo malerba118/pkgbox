@@ -1,0 +1,89 @@
+import { AppFile, AppFolder, AppNode } from "./types";
+import { AppManager } from "./app";
+import { action, makeObservable, observable } from "mobx";
+
+export class NodeManager {
+  id: string;
+  project_id: string;
+  app_id: "library" | "example" | "tests";
+  folder_id: string | null;
+  name: string;
+  hidden: boolean;
+  read_only?: boolean;
+  deleted_at?: number;
+  app: AppManager;
+
+  constructor(data: AppNode, app: AppManager) {
+    this.id = data.id;
+    this.app_id = data.app_id;
+    this.project_id = data.project_id;
+    this.folder_id = data.folder_id;
+    this.name = data.name;
+    this.hidden = data.hidden || false;
+    this.read_only = data.read_only || false;
+    this.app = app;
+  }
+
+  get folder(): FolderManager | undefined {
+    return this.folder_id ? this.app.foldersById[this.folder_id] : undefined;
+  }
+
+  get path(): string {
+    if (this.folder) {
+      return `${this.folder.path}/${this.name}`;
+    }
+    return this.name;
+  }
+}
+
+export class FileManager extends NodeManager {
+  contents: string;
+
+  constructor(data: AppFile, app: AppManager) {
+    super(data, app);
+    this.contents = data.contents;
+    makeObservable(this, {
+      contents: observable.ref,
+      setContents: action,
+    });
+  }
+
+  setContents(contents: string) {
+    this.contents = contents;
+  }
+}
+
+export class FolderManager extends NodeManager {
+  constructor(data: AppFolder, app: AppManager) {
+    super(data, app);
+  }
+
+  createFolder(data: { name: string; hidden?: boolean; read_only?: boolean }) {
+    return this.app.createFolder({
+      ...data,
+      folder_id: this.id,
+    });
+  }
+
+  createFile(data: {
+    name: string;
+    contents?: string;
+    hidden?: boolean;
+    read_only?: boolean;
+  }) {
+    return this.app.createFile({
+      ...data,
+      folder_id: this.id,
+    });
+  }
+
+  getChild(name: string) {
+    return this.children.find((node) => node.name === name);
+  }
+
+  get children() {
+    return this.app.nodes.filter((node) => {
+      return node.folder_id === this.id;
+    });
+  }
+}

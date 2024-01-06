@@ -1,84 +1,19 @@
-import { computed, makeObservable, observable, values } from "mobx";
-import { AppFile, AppFolder, AppNode, Project } from "./types";
+import { action, computed, makeObservable, observable, values } from "mobx";
+import { AppFile, AppFolder, Project } from "./types";
 import { nanoid } from "nanoid";
 import { removeForwardSlashes } from "../lib/utils";
+import { FileManager, FolderManager } from "./fs";
 
-class NodeManager {
-  id: string;
-  project_id: string;
-  app_id: "library" | "example" | "tests";
-  folder_id: string | null;
-  name: string;
-  hidden: boolean;
-  read_only?: boolean;
-  deleted_at?: number;
-  app: AppManager;
-
-  constructor(data: AppNode, app: AppManager) {
-    this.id = data.id;
-    this.app_id = data.app_id;
-    this.project_id = data.project_id;
-    this.folder_id = data.folder_id;
-    this.name = data.name;
-    this.hidden = data.hidden || false;
-    this.read_only = data.read_only || false;
-    this.app = app;
-  }
-}
-
-class FileManager extends NodeManager {
-  contents: string;
-
-  constructor(data: AppFile, app: AppManager) {
-    super(data, app);
-    this.contents = data.contents;
-  }
-}
-
-class FolderManager extends NodeManager {
-  constructor(data: AppFolder, app: AppManager) {
-    super(data, app);
-  }
-
-  createFolder(data: { name: string; hidden?: boolean; read_only?: boolean }) {
-    return this.app.createFolder({
-      ...data,
-      folder_id: this.id,
-    });
-  }
-
-  createFile(data: {
-    name: string;
-    contents?: string;
-    hidden?: boolean;
-    read_only?: boolean;
-  }) {
-    return this.app.createFile({
-      ...data,
-      folder_id: this.id,
-    });
-  }
-
-  getChild(name: string) {
-    return this.children.find((node) => node.name === name);
-  }
-
-  get children() {
-    return this.app.nodes.filter((node) => {
-      return node.folder_id === this.id;
-    });
-  }
-}
-
-interface App {
+export interface App {
   files: AppFile[];
   folders: AppFolder[];
 }
 
-class AppManager {
+export class AppManager {
   filesById: Record<string, FileManager> = {};
   foldersById: Record<string, FolderManager> = {};
   project: ProjectManager;
+  activeFileId: string | null = null;
 
   get app_id() {
     return "library" as "library";
@@ -86,29 +21,39 @@ class AppManager {
 
   constructor(data: App, project: ProjectManager) {
     this.project = project;
-    this.foldersById["root"] = new FolderManager(
-      {
-        id: "root",
-        app_id: this.app_id,
-        project_id: this.project.id,
-        name: "root",
-        folder_id: null,
-      },
-      this
-    );
     data.files.forEach((file) => {
       this.filesById[file.id] = new FileManager(file, this);
     });
     data.folders.forEach((folder) => {
       this.foldersById[folder.id] = new FolderManager(folder, this);
     });
+    this.foldersById["root"] = new FolderManager(
+      {
+        id: "root",
+        app_id: this.app_id,
+        project_id: this.project.id,
+        name: "",
+        folder_id: null,
+      },
+      this
+    );
     makeObservable(this, {
       filesById: observable.shallow,
       foldersById: observable.shallow,
       files: computed,
       folders: computed,
       nodes: computed,
+      activeFileId: observable.ref,
+      setActiveFileId: action,
     });
+  }
+
+  get activeFile() {
+    return this.activeFileId ? this.filesById[this.activeFileId] : null;
+  }
+
+  setActiveFileId(fileId: string) {
+    this.activeFileId = fileId;
   }
 
   createFile({
