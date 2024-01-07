@@ -1,23 +1,22 @@
 import { action, computed, makeObservable, observable, values } from "mobx";
-import { AppFile, AppFolder, Project } from "./types";
+import { AppFile, AppFolder, FileMap, Project, Template } from "./types";
 import { nanoid } from "nanoid";
 import { removeForwardSlashes } from "../lib/utils";
 import { FileManager, FolderManager } from "./fs";
+import { ProjectManager } from "./project";
 
 export interface App {
   files: AppFile[];
   folders: AppFolder[];
 }
 
-export class AppManager {
+export abstract class AppManager {
   filesById: Record<string, FileManager> = {};
   foldersById: Record<string, FolderManager> = {};
   project: ProjectManager;
   activeFileId: string | null = null;
 
-  get app_id() {
-    return "library" as "library";
-  }
+  abstract get app_id(): "library" | "tests" | "example";
 
   constructor(data: App, project: ProjectManager) {
     this.project = project;
@@ -30,6 +29,7 @@ export class AppManager {
     this.foldersById["root"] = new FolderManager(
       {
         id: "root",
+        // @ts-ignore
         app_id: this.app_id,
         project_id: this.project.id,
         name: "",
@@ -115,6 +115,58 @@ export class AppManager {
     return folder;
   }
 
+  createFilesFromFileMap(fileMap: FileMap) {
+    Object.entries(fileMap).forEach(([path, file]) => {
+      this.createFileFromPath({ path, contents: file.code });
+    });
+  }
+
+  createFileFromPath({
+    path,
+    contents = "",
+  }: {
+    path: string;
+    contents?: string;
+  }) {
+    const parts = path.split("/").filter((part) => part.length > 0); // Split path and filter out empty parts
+    let currentFolder = this.root;
+
+    // Iterate over each part of the path except the last one (which is the file)
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+
+      // Check if folder exists, if not, create it
+      let folder = currentFolder.children.find((f) => f.name === part);
+      if (!folder) {
+        folder = currentFolder.createFolder({ name: part });
+      } else if (folder instanceof FileManager) {
+        throw new Error(
+          "Cannot create folder because file already exists with this name"
+        );
+      }
+
+      // Update currentFolder to the newly created or found folder
+      currentFolder = folder;
+    }
+
+    // Create file in the final directory
+    const fileName = parts.at(-1)!; // Get the file name, which is the last part of the path
+    currentFolder.createFile({
+      name: fileName,
+      contents,
+    });
+  }
+
+  toFileMap() {
+    const fileMap: FileMap = {};
+    this.files.forEach((file) => {
+      fileMap[file.path] = {
+        code: file.contents,
+      };
+    });
+    return fileMap;
+  }
+
   get files() {
     return values(this.filesById);
   }
@@ -129,17 +181,5 @@ export class AppManager {
 
   get root() {
     return this.foldersById["root"];
-  }
-}
-
-export class ProjectManager {
-  id: string;
-  name: string;
-  library: AppManager;
-
-  constructor(data: Project) {
-    this.id = data.id;
-    this.name = data.name;
-    this.library = new AppManager({ files: [], folders: [] }, this);
   }
 }
