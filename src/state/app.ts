@@ -45,6 +45,8 @@ export abstract class AppManager {
       nodes: computed,
       activeFileId: observable.ref,
       setActiveFileId: action,
+      createFileFromPath: action,
+      createFilesFromFileMap: action,
     });
   }
 

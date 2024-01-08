@@ -1,25 +1,45 @@
-import { makeObservable, observable, runInAction } from "mobx";
-import { Emulator, EmulatorFiles } from "../emulator";
+import { action, makeObservable, observable, runInAction, when } from "mobx";
+import { Emulator, EmulatorFiles } from "./emulator";
 import { WebContainerProcess } from "@webcontainer/api";
+import { InitializationStatus, Runner } from "./runner";
 
 interface InstallOptions {
   force?: boolean;
 }
 
-export class ExampleRunner {
-  emulator: Emulator;
+enum ServerStatus {
+  Starting = "starting",
+  Started = "started",
+  Stopped = "stopped",
+  Error = "error",
+}
+
+export class ExampleRunner extends Runner {
   serverProcess: WebContainerProcess | null = null;
   url: string | null = null;
   port: number | null = null;
+  serverStatus: ServerStatus;
 
   constructor(emulator: Emulator) {
-    this.emulator = emulator;
-    makeObservable(this, { url: observable.ref, port: observable.ref });
+    super(emulator);
+    this.serverStatus = ServerStatus.Stopped;
+    makeObservable(this, {
+      url: observable.ref,
+      port: observable.ref,
+      serverStatus: observable.ref,
+      setServerStatus: action,
+    });
+  }
+
+  setServerStatus(status: ServerStatus) {
+    this.serverStatus = status;
   }
 
   init = async (files: EmulatorFiles, packageId: string) => {
+    this.setInitializationStatus(InitializationStatus.Initializating);
     await this.updateFiles(files);
     await this.install([packageId]);
+    this.setInitializationStatus(InitializationStatus.Initialized);
     // await this.startServer();
   };
 
@@ -36,6 +56,8 @@ export class ExampleRunner {
   };
 
   startServer = async () => {
+    this.setServerStatus(ServerStatus.Starting);
+    await this.initialization;
     const nextServerProcess = await this.emulator.run("npm", [
       "--prefix",
       ".app",
@@ -52,6 +74,7 @@ export class ExampleRunner {
             this.port = port;
             this.url = url;
           });
+          this.setServerStatus(ServerStatus.Started);
           unsubscribe();
           resolve({ port, url });
         }

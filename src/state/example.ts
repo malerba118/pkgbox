@@ -1,6 +1,6 @@
-import { App, AppManager } from "../app";
-import { ProjectManager } from "../project";
-import { ExampleRunner } from "./runner";
+import { App, AppManager } from "./app";
+import { ProjectManager } from "./project";
+import { ExampleRunner } from "./runners/example";
 
 export class ExampleManager extends AppManager {
   runner: ExampleRunner;

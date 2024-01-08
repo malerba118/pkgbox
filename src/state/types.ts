@@ -29,3 +29,6 @@ export type Template = {
   example: FileMap;
   tests: FileMap;
 };
+
+export type Subscriber<T> = (event: T) => void;
+export type Unsubscribe = () => void;

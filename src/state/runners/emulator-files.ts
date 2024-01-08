@@ -28,13 +28,19 @@ export const files = {
             }
         }
           const cwd = process.cwd()
-          
+          const libraryDir = path.join(cwd, '.library');
+          fs.mkdirSync(libraryDir);
+          const appDir = path.join(cwd, '.app');
+          fs.mkdirSync(appDir);
+          const testsDir = path.join(cwd, '.tests');
+          fs.mkdirSync(testsDir);
+      
           const app = express();
           const port = 3000;
           
           app.use(express.json());
           app.use(cors());
-          
+      
           app.get('/', async (req, res) => {
               return res.send(\`<html>
               <head>
@@ -90,12 +96,7 @@ export const files = {
               return obj;
           }
     
-          app.post('/library/files', async (req, res) => {    
-            const libraryDir = path.join(cwd, '.library');
-            if (!fs.existsSync(libraryDir)) {
-                fs.mkdirSync(libraryDir);
-            }
-        
+          app.post('/library/files', async (req, res) => {           
             let packageJsonUpdated = false;
         
             try {
@@ -127,12 +128,8 @@ export const files = {
     
     
         app.post('/library/build', async (req, res) => {   
-            const libraryDir = path.join(cwd, '.library');
             const distDir = path.join(libraryDir, 'dist')
-            if (!fs.existsSync(libraryDir)) {
-                return res.status(400).send({ error: 'No .library directory found' });
-            }
-    
+     
             if (!fs.existsSync(distDir)) {
                fs.mkdirSync(distDir);
             }
@@ -166,12 +163,7 @@ export const files = {
             }
         });
   
-        app.post('/app/files', async (req, res) => {    
-          const appDir = path.join(cwd, '.app');
-          if (!fs.existsSync(appDir)) {
-              fs.mkdirSync(appDir);
-          }
-      
+        app.post('/app/files', async (req, res) => {     
           let packageJsonUpdated = false;
       
           try {
@@ -216,12 +208,7 @@ export const files = {
           }
       });
   
-      app.post('/app/install', async (req, res) => {    
-          const appDir = path.join(cwd, '.app');
-          if (!fs.existsSync(appDir)) {
-              return res.status(400).send({ error: 'No .app directory found' });
-          }
-      
+      app.post('/app/install', async (req, res) => {          
           try {
               const dependencies = req.body.dependencies
               const result = cp.spawnSync('npm', ['install', ...dependencies], { cwd: appDir, stdio: DEBUG ? 'inherit' : null });          
@@ -235,11 +222,6 @@ export const files = {
       });
   
       app.post('/tests/files', async (req, res) => {    
-          const testsDir = path.join(cwd, '.tests');
-          if (!fs.existsSync(testsDir)) {
-              fs.mkdirSync(testsDir);
-          }
-      
           let packageJsonUpdated = false;
       
           try {
@@ -283,12 +265,7 @@ export const files = {
       });
     
       
-       app.post('/tests/install', async (req, res) => {    
-          const testsDir = path.join(cwd, '.tests');
-          if (!fs.existsSync(testsDir)) {
-              return res.status(400).send({ error: 'No .tests directory found' });
-          }
-      
+       app.post('/tests/install', async (req, res) => {       
           try {
               const dependencies = req.body.dependencies
               const result = cp.spawnSync('npm', ['install', ...dependencies], { cwd: testsDir, stdio: DEBUG ? 'inherit' : null });          

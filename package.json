@@ -17,6 +17,8 @@
     "@webcontainer/api": "^1.1.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "eventemitter3": "^5.0.1",
+    "lodash": "^4.17.21",
     "mobx": "^6.12.0",
     "mobx-react": "^9.1.0",
     "nanoid": "^5.0.4",
@@ -27,6 +29,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

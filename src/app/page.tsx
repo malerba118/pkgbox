@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useLatestRef } from "@chakra-ui/hooks";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Emulator } from "../state/emulator";
+import { Emulator } from "../state/runners/emulator";
 import { autorun, when } from "mobx";
 import { VANILLA_TEMPLATE } from "../templates/vanilla";
 
@@ -17,42 +17,30 @@ const emulatorPromise = Emulator.create();
 
 const useProject = () => {
   const [project, setProject] = useState<ProjectManager | null>(null);
+  const projectAlreadyExistsRef = useRef(false);
 
   useEffect(() => {
     emulatorPromise.then((emulator) => {
-      const project = new ProjectManager(
-        {
-          id: nanoid(),
-          name: "project",
-          files: [],
-          folders: [],
-        },
-        emulator
-      );
-      // project.library.createFile({
-      //   name: "index.ts",
-      //   contents: `import { add } from './tests/math.test'
-
-      // const sum = add(1, 2)`,
-      // });
-      // const tests = project.library.createFolder({ name: "tests" });
-      // tests.createFile({
-      //   name: "math.test.ts",
-      //   contents: `export const add = (a: number, b: number): number => {
-      //     return a + b
-      // }`,
-      // });
-      project.createFilesFromTemplate(VANILLA_TEMPLATE);
-      setProject(project);
+      if (!projectAlreadyExistsRef.current) {
+        projectAlreadyExistsRef.current = true;
+        const project = new ProjectManager(
+          {
+            id: nanoid(),
+            name: "project",
+            files: [],
+            folders: [],
+          },
+          emulator
+        );
+        project.createFilesFromTemplate(VANILLA_TEMPLATE);
+        setProject(project);
+      }
     });
   }, []);
 
   useEffect(() => {
     if (project) {
       project.init();
-      autorun(() => {
-        console.log(JSON.stringify(project.library.runner.initialization));
-      });
     }
   }, [project]);
 
@@ -91,8 +79,16 @@ const ModelFile = ({ path, contents, isDisabled }: any) => {
   return null;
 };
 
-const ExamplePreview = observer(() => {
-  return <iframe className="h-full w-full bg-red-300" />;
+const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
+  if (!project.example.runner.url) {
+    return null;
+  }
+  return (
+    <iframe
+      src={project.example.runner.url}
+      className="h-full w-full bg-red-300"
+    />
+  );
 });
 
 const AppTabs = observer(({ project }: any) => {
@@ -106,6 +102,22 @@ const AppTabs = observer(({ project }: any) => {
     >
       <TabsList className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden">
         <TabsTrigger value="library">Library</TabsTrigger>
+        <TabsTrigger value="example">Example</TabsTrigger>
+        <TabsTrigger value="tests">Tests</TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+});
+
+const PreviewTabs = observer(({ project }: any) => {
+  return (
+    <Tabs
+      value={project.activePreview}
+      onValueChange={(val) => {
+        project.setActivePreview(val);
+      }}
+    >
+      <TabsList>
         <TabsTrigger value="example">Example</TabsTrigger>
         <TabsTrigger value="tests">Tests</TabsTrigger>
       </TabsList>
@@ -138,7 +150,7 @@ const Home = () => {
           </Tabs>
           <div className="relative flex-1">
             <div
-              className="overlay"
+              className="h-full"
               style={{
                 visibility: project.library.activeFile ? "visible" : "hidden",
               }}
@@ -181,6 +193,8 @@ const Home = () => {
                   minimap: {
                     enabled: false,
                   },
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
                 }}
               />
               {project.library.files.map((file) => (
@@ -194,8 +208,11 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div className="flex-1">
-          <ExamplePreview />
+        <div className="stack flex-1">
+          <PreviewTabs project={project} />
+          <div className="flex-1">
+            <ExamplePreview project={project} />
+          </div>
         </div>
       </div>
       <AppTabs project={project} />
