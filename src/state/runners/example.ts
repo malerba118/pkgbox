@@ -7,7 +7,7 @@ interface InstallOptions {
   force?: boolean;
 }
 
-enum ServerStatus {
+export enum ServerStatus {
   Starting = "starting",
   Started = "started",
   Stopped = "stopped",
@@ -16,6 +16,7 @@ enum ServerStatus {
 
 export class ExampleRunner extends Runner {
   serverProcess: WebContainerProcess | null = null;
+  installProcess: WebContainerProcess | null = null;
   url: string | null = null;
   port: number | null = null;
   serverStatus: ServerStatus;
@@ -52,10 +53,17 @@ export class ExampleRunner extends Runner {
     options: InstallOptions = { force: false }
   ) => {
     console.log("installing app dependencies: " + dependencies.join(","));
-    return this.emulator.post("/app/install", { dependencies, options });
+    this.installProcess?.kill();
+    this.installProcess = await this.emulator.run("npm", [
+      "--prefix",
+      ".app",
+      "install",
+      ...dependencies,
+    ]);
+    // return this.emulator.post("/app/install", { dependencies, options });
   };
 
-  startServer = async () => {
+  start = async () => {
     // if (
     //   this.serverStatus === ServerStatus.Starting
     // ) {
@@ -63,14 +71,13 @@ export class ExampleRunner extends Runner {
     // }
     this.setServerStatus(ServerStatus.Starting);
     await this.initialization;
-    const nextServerProcess = await this.emulator.run("npm", [
+    this.stop();
+    this.serverProcess = await this.emulator.run("npm", [
       "--prefix",
       ".app",
       "run",
       "dev",
     ]);
-    this.serverProcess?.kill();
-    this.serverProcess = nextServerProcess;
     return new Promise<{ port: number; url: string }>((resolve) => {
       const unsubscribe = this.emulator.container.on(
         "server-ready",
@@ -85,5 +92,10 @@ export class ExampleRunner extends Runner {
         }
       );
     });
+  };
+
+  stop = () => {
+    this.serverProcess?.kill();
+    this.serverProcess = null;
   };
 }

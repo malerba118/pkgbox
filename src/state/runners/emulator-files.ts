@@ -98,6 +98,12 @@ export const files = {
     
           app.post('/library/files', async (req, res) => {           
             let packageJsonUpdated = false;
+            let existingPackageJson = null;
+            const packageJsonPath = path.join(libraryDir, 'package.json');
+    
+            if (fs.existsSync(packageJsonPath)) {
+                existingPackageJson = fs.readFileSync(packageJsonPath, 'utf8')
+            }
         
             try {
                 const files = req.body
@@ -107,7 +113,7 @@ export const files = {
                     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
                     fs.writeFileSync(fullPath, files[filePath].code);
         
-                    if (normalizedPath === 'package.json') {
+                    if (normalizedPath === 'package.json' && files[filePath].code !== existingPackageJson) {
                         packageJsonUpdated = true;
                     }
                 }
@@ -208,19 +214,6 @@ export const files = {
           }
       });
   
-      app.post('/app/install', async (req, res) => {          
-          try {
-              const dependencies = req.body.dependencies
-              const result = cp.spawnSync('npm', ['install', ...dependencies], { cwd: appDir, stdio: DEBUG ? 'inherit' : null });          
-              if (result.error) {
-                  throw result.error;
-              }
-              res.send({ message: 'Installed in .app directory' });
-          } catch (error) {
-              res.status(500).send({ error: 'Error processing files', details: error.message });
-          }
-      });
-  
       app.post('/tests/files', async (req, res) => {    
           let packageJsonUpdated = false;
       
@@ -264,21 +257,6 @@ export const files = {
           }
       });
     
-      
-       app.post('/tests/install', async (req, res) => {       
-          try {
-              const dependencies = req.body.dependencies
-              const result = cp.spawnSync('npm', ['install', ...dependencies], { cwd: testsDir, stdio: DEBUG ? 'inherit' : null });          
-              if (result.error) {
-                  throw result.error;
-              }
-              res.send({ message: 'Installed in .tests directory' });
-          } catch (error) {
-              res.status(500).send({ error: 'Error processing files', details: error.message });
-          }
-      });
-    
-  
           
         app.listen(port, () => {
             console.log("Server running");

@@ -8,12 +8,20 @@ interface InstallOptions {
 }
 
 export class TestsRunner extends Runner {
-  process: WebContainerProcess | null = null;
+  installProcess: WebContainerProcess | null = null;
+  serverProcess: WebContainerProcess | null = null;
   results: any;
+
+  constructor(emulator: Emulator) {
+    super(emulator);
+    this.results = null;
+    makeObservable(this, {
+      results: observable.ref,
+    });
+  }
 
   init = async (files: EmulatorFiles, packageId: string) => {
     this.setInitializationStatus(InitializationStatus.Initializating);
-    console.log(files);
     await this.updateFiles(files);
     await this.install([packageId]);
     this.emulator.container.fs.watch(".tests/output.json", (action) => {
@@ -43,18 +51,29 @@ export class TestsRunner extends Runner {
     dependencies: string[] = [],
     options: InstallOptions = { force: false }
   ) => {
-    return this.emulator.post("/tests/install", { dependencies, options });
+    this.installProcess?.kill();
+    this.installProcess = await this.emulator.run("npm", [
+      "--prefix",
+      ".tests",
+      "install",
+      ...dependencies,
+    ]);
+    // return this.emulator.post("/tests/install", { dependencies, options });
   };
 
-  startTests = async () => {
+  start = async () => {
     await this.initialization;
-    const nextProcess = await this.emulator.run("npm", [
+    this.stop();
+    this.serverProcess = await this.emulator.run("npm", [
       "--prefix",
       ".tests",
       "run",
       "test",
     ]);
-    this.process?.kill();
-    this.process = nextProcess;
+  };
+
+  stop = () => {
+    this.serverProcess?.kill();
+    this.serverProcess = null;
   };
 }

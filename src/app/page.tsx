@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Emulator } from "../state/runners/emulator";
 import { autorun, when } from "mobx";
 import { VANILLA_TEMPLATE } from "../templates/vanilla";
+import { ServerStatus } from "../state/runners/example";
 
 const emulatorPromise = Emulator.create();
 
@@ -80,15 +81,26 @@ const ModelFile = ({ path, contents, isDisabled }: any) => {
 };
 
 const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
-  if (!project.example.runner.url) {
-    return null;
+  if (
+    !project.example.runner.url ||
+    project.example.runner.serverStatus === ServerStatus.Starting
+  ) {
+    return <div>Loading...</div>;
   }
+
   return (
     <iframe
       src={project.example.runner.url}
       className="h-full w-full bg-red-300"
     />
   );
+});
+
+const TestsPreview = observer(({ project }: { project: ProjectManager }) => {
+  if (!project.tests.runner.results) {
+    return null;
+  }
+  return <pre>{JSON.stringify(project.tests.runner.results)}</pre>;
 });
 
 const AppTabs = observer(({ project }: any) => {
@@ -211,7 +223,11 @@ const Home = () => {
         <div className="stack flex-1">
           <PreviewTabs project={project} />
           <div className="flex-1">
-            <ExamplePreview project={project} />
+            {project.activePreview === "example" ? (
+              <ExamplePreview project={project} />
+            ) : (
+              <TestsPreview project={project} />
+            )}
           </div>
         </div>
       </div>

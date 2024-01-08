@@ -52,14 +52,14 @@ export class ProjectManager {
     this.library.runner.onBuild(async (result) => {
       if (this.activePreview === "example") {
         await this.example.runner.install([result.packageId]);
-        await this.example.runner.startServer();
-        // await this.tests.runner.install([result.packageId]);
+        await this.example.runner.start();
+        await this.tests.runner.install([result.packageId]);
         // await this.tests.runner.startTests();
       } else {
         // reverse the order
         await this.tests.runner.install([result.packageId]);
-        await this.tests.runner.startTests();
-        // await this.example.runner.install([result.packageId]);
+        await this.tests.runner.start();
+        await this.example.runner.install([result.packageId]);
         // await this.example.runner.startServer();
       }
     });
@@ -69,6 +69,21 @@ export class ProjectManager {
         this.library.runner.debounced.updateFilesAndBuild(
           this.library.toFileMap()
         );
+      },
+      {
+        fireImmediately: false,
+      }
+    );
+    reaction(
+      () => this.activePreview,
+      () => {
+        if (this.activePreview === "example") {
+          this.tests.runner.stop();
+          this.example.runner.start();
+        } else {
+          this.example.runner.stop();
+          this.tests.runner.start();
+        }
       },
       {
         fireImmediately: false,
