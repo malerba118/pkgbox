@@ -56,6 +56,11 @@ export class ExampleRunner extends Runner {
   };
 
   startServer = async () => {
+    // if (
+    //   this.serverStatus === ServerStatus.Starting
+    // ) {
+    //   return;
+    // }
     this.setServerStatus(ServerStatus.Starting);
     await this.initialization;
     const nextServerProcess = await this.emulator.run("npm", [

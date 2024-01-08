@@ -1,4 +1,4 @@
-import { action, makeObservable, observable, reaction } from "mobx";
+import { action, makeObservable, observable, reaction, when } from "mobx";
 import { Project, Template } from "./types";
 import { LibraryManager } from "./library";
 import { ExampleManager } from "./example";

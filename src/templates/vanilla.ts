@@ -207,7 +207,7 @@ export const VANILLA_TEMPLATE: Template = {
     export default defineConfig({
       plugins: [
         react(),
-      ],
+      ]
     });`,
     },
   },
