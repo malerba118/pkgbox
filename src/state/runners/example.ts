@@ -2,6 +2,7 @@ import { action, makeObservable, observable, runInAction, when } from "mobx";
 import { Emulator, EmulatorFiles } from "./emulator";
 import { WebContainerProcess } from "@webcontainer/api";
 import { InitializationStatus, Runner } from "./runner";
+import { debounce } from "lodash";
 
 interface InstallOptions {
   force?: boolean;
@@ -31,6 +32,12 @@ export class ExampleRunner extends Runner {
       setServerStatus: action,
     });
   }
+
+  debounced = {
+    updateFiles: debounce((files: EmulatorFiles) => {
+      this.updateFiles(files);
+    }, 700),
+  };
 
   setServerStatus(status: ServerStatus) {
     this.serverStatus = status;

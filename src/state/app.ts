@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { removeForwardSlashes } from "../lib/utils";
 import { FileManager, FolderManager } from "./fs";
 import { ProjectManager } from "./project";
+import JSON5 from "json5";
 
 export interface App {
   files: AppFile[];
@@ -167,6 +168,36 @@ export abstract class AppManager {
       };
     });
     return fileMap;
+  }
+
+  get typescriptConfig() {
+    const file = this.files.find(
+      (file) => file.name === "tsconfig.json" && file.folder_id === "root"
+    );
+    if (file) {
+      try {
+        return JSON5.parse(file.contents);
+      } catch (err) {
+        console.warn("Error parsing tsconfig.json");
+        return null;
+      }
+    }
+    return null;
+  }
+
+  get packageJson() {
+    const file = this.files.find(
+      (file) => file.name === "package.json" && file.folder_id === "root"
+    );
+    if (file) {
+      try {
+        return JSON5.parse(file.contents);
+      } catch (err) {
+        console.warn("Error parsing package.json");
+        return null;
+      }
+    }
+    return null;
   }
 
   get files() {

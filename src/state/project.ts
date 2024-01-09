@@ -8,7 +8,7 @@ import { TestsManager } from "./tests";
 export class ProjectManager {
   id: string;
   name: string;
-  activeApp: string;
+  activeAppId: string;
   activePreview: string;
   emulator: Emulator;
   library: LibraryManager;
@@ -19,7 +19,7 @@ export class ProjectManager {
   constructor(data: Project, emulator: Emulator) {
     this.id = data.id;
     this.name = data.name;
-    this.activeApp = "library";
+    this.activeAppId = "example";
     this.activePreview = "example";
     this.emulator = emulator;
     this.library = new LibraryManager(
@@ -44,8 +44,8 @@ export class ProjectManager {
       this
     );
     makeObservable(this, {
-      activeApp: observable.ref,
-      setActiveApp: action,
+      activeAppId: observable.ref,
+      setActiveAppId: action,
       activePreview: observable.ref,
       setActivePreview: action,
     });
@@ -63,17 +63,6 @@ export class ProjectManager {
         // await this.example.runner.startServer();
       }
     });
-    reaction(
-      () => JSON.stringify(this.library.toFileMap()),
-      () => {
-        this.library.runner.debounced.updateFilesAndBuild(
-          this.library.toFileMap()
-        );
-      },
-      {
-        fireImmediately: false,
-      }
-    );
     reaction(
       () => this.activePreview,
       () => {
@@ -104,8 +93,17 @@ export class ProjectManager {
     ]);
   }
 
-  setActiveApp(activeApp: string) {
-    this.activeApp = activeApp;
+  get activeApp() {
+    if (this.activeAppId === "library") {
+      return this.library;
+    } else if (this.activeAppId === "example") {
+      return this.example;
+    }
+    return this.tests;
+  }
+
+  setActiveAppId(activeAppId: string) {
+    this.activeAppId = activeAppId;
   }
 
   setActivePreview(activePreview: string) {

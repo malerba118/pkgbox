@@ -13,6 +13,10 @@ import { Emulator } from "../state/runners/emulator";
 import { autorun, when } from "mobx";
 import { VANILLA_TEMPLATE } from "../templates/vanilla";
 import { ServerStatus } from "../state/runners/example";
+import {
+  AutoTypings,
+  LocalStorageCache,
+} from "monaco-editor-auto-typings/custom-editor";
 
 const emulatorPromise = Emulator.create();
 
@@ -107,9 +111,9 @@ const AppTabs = observer(({ project }: any) => {
   return (
     <Tabs
       // className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden"
-      value={project.activeApp}
+      value={project.activeAppId}
       onValueChange={(val) => {
-        project.setActiveApp(val);
+        project.setActiveAppId(val);
       }}
     >
       <TabsList className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden">
@@ -145,15 +149,16 @@ const Home = () => {
   return (
     <main className="">
       <div className="hstack">
-        <div className="stack h-screen gap-1 flex-1">
+        <div className="stack h-screen gap-1 flex-1 min-w-0">
           <Tabs
-            value={project.library.activeFileId || ""}
+            value={project.activeApp.activeFileId || ""}
             onValueChange={(val) => {
-              project.library.setActiveFileId(val);
+              project.activeApp.setActiveFileId(val);
             }}
+            className="w-full overflow-auto"
           >
             <TabsList>
-              {project.library.files.map((file) => (
+              {project.activeApp.files.map((file) => (
                 <TabsTrigger key={file.id} value={file.id}>
                   {file.name}
                 </TabsTrigger>
@@ -164,17 +169,71 @@ const Home = () => {
             <div
               className="h-full"
               style={{
-                visibility: project.library.activeFile ? "visible" : "hidden",
+                visibility: project.activeApp.activeFile ? "visible" : "hidden",
               }}
             >
               <Editor
                 height="100%"
-                path={project.library.activeFile?.path}
-                value={project.library.activeFile?.contents}
-                keepCurrentModel
+                key={project.activeAppId}
+                path={project.activeApp.activeFile?.path}
+                value={project.activeApp.activeFile?.contents}
+                // keepCurrentModel
                 onMount={(editor, monaco) => {
                   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(
                     true
+                  );
+                  // const rawCompilerOptions =
+                  //   project.activeApp.typescriptConfig?.compilerOptions || {};
+                  // // Map tsConfig to Monaco Editor settings
+                  // const monacoCompilerOptions = {
+                  //   target: monaco.languages.typescript.ScriptTarget.ESNext,
+                  //   moduleResolution:
+                  //     monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+                  //   allowNonTsExtensions:
+                  //     rawCompilerOptions.allowNonTsExtensions ?? true,
+                  //   noImplicitAny: rawCompilerOptions.noImplicitAny ?? false,
+                  //   strictNullChecks:
+                  //     rawCompilerOptions.strictNullChecks ?? false,
+                  //   strictFunctionTypes:
+                  //     rawCompilerOptions.strictFunctionTypes ?? false,
+                  //   strictPropertyInitialization:
+                  //     rawCompilerOptions.strictPropertyInitialization ?? false,
+                  //   noEmit: rawCompilerOptions.noEmit ?? true,
+                  //   esModuleInterop:
+                  //     rawCompilerOptions.esModuleInterop ?? false,
+                  //   experimentalDecorators:
+                  //     rawCompilerOptions.experimentalDecorators ?? false,
+                  //   allowJs: rawCompilerOptions.allowJs ?? false,
+                  //   typeRoots: rawCompilerOptions.typeRoots ?? [],
+                  //   baseUrl: rawCompilerOptions.baseUrl ?? ".",
+                  //   paths: rawCompilerOptions.paths ?? {},
+                  //   jsx: rawCompilerOptions.jsx,
+                  //   allowImportingTsExtensions:
+                  //     rawCompilerOptions.allowImportingTsExtensions ?? true,
+                  // };
+                  const compilerOptions = {
+                    target: monaco.languages.typescript.ScriptTarget.Latest,
+                    allowNonTsExtensions: true,
+                    resolveJsonModule: true,
+                    moduleResolution:
+                      monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+                    // module: monaco.languages.typescript.ModuleKind.CommonJS,
+                    typeRoots: ["node_modules/@types"],
+                    allowSyntheticDefaultImports: true,
+                    allowJs: true,
+                    strict: false,
+                    noImplicitAny: false,
+                    allowImportingTsExtensions: true,
+                    noEmit: true,
+                    esModuleInterop: true,
+                    jsx: monaco.languages.typescript.JsxEmit.Preserve,
+                    reactNamespace: "React",
+                  };
+                  monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
+                    compilerOptions
+                  );
+                  monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
+                    compilerOptions
                   );
                   editor.onDidChangeModel(() => {
                     // When switching files we need to run typescript compiler.
@@ -190,16 +249,25 @@ const Home = () => {
                     }
                   );
 
-                  // AutoTypings.create(editor, {
-                  //   monaco,
-                  //   sourceCache: new LocalStorageCache(),
-                  //   fileRootPath: "./",
-                  // }).then(() => {
-                  //   console.log("Watching package declarations.");
-                  // });
+                  AutoTypings.create(editor, {
+                    monaco,
+                    sourceCache: new LocalStorageCache(),
+                    shareCache: true,
+                    fileRootPath: "file:///",
+                    preloadPackages: true,
+                    onlySpecifiedPackages: true,
+                    versions: {
+                      ...project.activeApp.packageJson?.dependencies,
+                      ...project.activeApp.packageJson?.devDependencies,
+                    },
+                    onError: console.error,
+                    onUpdate: console.log,
+                  }).then(() => {
+                    console.log("Watching package declarations.");
+                  });
                 }}
                 onChange={(val) => {
-                  project.library.activeFile?.setContents(val || "");
+                  project.activeApp.activeFile?.setContents(val || "");
                 }}
                 options={{
                   minimap: {
@@ -209,12 +277,12 @@ const Home = () => {
                   scrollBeyondLastLine: false,
                 }}
               />
-              {project.library.files.map((file) => (
+              {project.activeApp.files.map((file) => (
                 <ModelFile
                   key={file.id}
                   path={file.path}
                   contents={file.contents}
-                  isDisabled={project.library.activeFileId === file.id}
+                  isDisabled={project.activeApp.activeFileId === file.id}
                 />
               ))}
             </div>
