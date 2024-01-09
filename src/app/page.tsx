@@ -16,7 +16,40 @@ import { ServerStatus } from "../state/runners/example";
 import {
   AutoTypings,
   LocalStorageCache,
+  SourceResolver,
 } from "monaco-editor-auto-typings/custom-editor";
+
+export class UnpkgSourceResolver implements SourceResolver {
+  emulator: Emulator;
+
+  constructor(emulator: Emulator) {
+    this.emulator = emulator;
+  }
+
+  public async resolvePackageJson(
+    packageName: string,
+    version: string | undefined,
+    subPath: string | undefined
+  ): Promise<string | undefined> {
+    const path = packageName + (subPath ? `/${subPath}` : "") + "/package.json";
+    const result = await this.emulator.get(
+      `/app/package?path=${encodeURIComponent(path)}`
+    );
+    return result.contents;
+  }
+
+  public async resolveSourceFile(
+    packageName: string,
+    version: string | undefined,
+    path: string
+  ): Promise<string | undefined> {
+    const _path = packageName + (path ? `/${path}` : "");
+    const result = await this.emulator.get(
+      `/app/package?path=${encodeURIComponent(_path)}`
+    );
+    return result.contents;
+  }
+}
 
 const emulatorPromise = Emulator.create();
 
@@ -226,7 +259,7 @@ const Home = () => {
                     allowImportingTsExtensions: true,
                     noEmit: true,
                     esModuleInterop: true,
-                    jsx: monaco.languages.typescript.JsxEmit.Preserve,
+                    jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
                     reactNamespace: "React",
                   };
                   monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
@@ -249,21 +282,41 @@ const Home = () => {
                     }
                   );
 
-                  AutoTypings.create(editor, {
-                    monaco,
-                    sourceCache: new LocalStorageCache(),
-                    shareCache: true,
-                    fileRootPath: "file:///",
-                    preloadPackages: true,
-                    onlySpecifiedPackages: true,
-                    versions: {
-                      ...project.activeApp.packageJson?.dependencies,
-                      ...project.activeApp.packageJson?.devDependencies,
-                    },
-                    onError: console.error,
-                    onUpdate: console.log,
-                  }).then(() => {
-                    console.log("Watching package declarations.");
+                  project.example.runner.initialization.then(() => {
+                    AutoTypings.create(editor, {
+                      monaco,
+                      // sourceCache: new LocalStorageCache(),
+                      shareCache: true,
+                      fileRootPath: "file:///",
+                      preloadPackages: true,
+                      onlySpecifiedPackages: true,
+                      versions: {
+                        ...project.activeApp.packageJson?.dependencies,
+                        ...project.activeApp.packageJson?.devDependencies,
+                        [project.library.packageJson.name]: "latest",
+                      },
+
+                      sourceResolver: new UnpkgSourceResolver(project.emulator),
+                      onError: console.error,
+                      onUpdate: console.log,
+                    }).then(() => {
+                      console.log("Watching package declarations.");
+                    });
+
+                    project.emulator
+                      .get(
+                        `/app/package?path=${encodeURIComponent(
+                          "@types/react/index.d.ts"
+                        )}`
+                      )
+                      .then((result: any) => {
+                        if (result?.contents) {
+                          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                            result.contents,
+                            "file:///node_modules/@types/react/index.d.ts"
+                          );
+                        }
+                      });
                   });
                 }}
                 onChange={(val) => {

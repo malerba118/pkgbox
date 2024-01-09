@@ -27,6 +27,7 @@ export const files = {
                 // Handle any errors during reading the file
             }
         }
+        
           const cwd = process.cwd()
           const libraryDir = path.join(cwd, '.library');
           fs.mkdirSync(libraryDir);
@@ -213,6 +214,27 @@ export const files = {
               res.status(500).send({ error: 'Error processing files', details: error.message });
           }
       });
+
+      app.get('/app/package', async (req, res) => {
+        const packagePath = req.query.path;
+        if (!packagePath) {
+            return res.status(400).send({ error: 'No path provided' });
+        }
+    
+        try {
+            const decodedPath = decodeURIComponent(packagePath);
+    
+            const filePath = path.join(appDir, 'node_modules', decodedPath);
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).send({ error: 'File not found' });
+            }
+    
+            const fileContents = fs.readFileSync(filePath, 'utf8');
+            res.json({ contents: fileContents });
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
   
       app.post('/tests/files', async (req, res) => {    
           let packageJsonUpdated = false;
