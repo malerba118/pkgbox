@@ -200,6 +200,13 @@ export abstract class AppManager {
     return null;
   }
 
+  get dependencies() {
+    return {
+      ...this.packageJson?.dependencies,
+      ...this.packageJson?.devDependencies,
+    };
+  }
+
   get files() {
     return values(this.filesById);
   }

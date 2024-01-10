@@ -56,8 +56,12 @@ export class TestsRunner extends Runner {
       "--prefix",
       ".tests",
       "install",
+      "--no-audit",
+      "--no-fund",
+      // "--no-package-lock",
       ...dependencies,
     ]);
+    return this.installProcess.exit;
     // return this.emulator.post("/tests/install", { dependencies, options });
   };
 

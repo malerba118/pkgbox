@@ -4,7 +4,6 @@ import { Button } from "../components/ui/button";
 import { ProjectManager } from "../state/project";
 import { nanoid } from "nanoid";
 import { removeForwardSlashes } from "../lib/utils";
-import { Editor, useMonaco } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useLatestRef } from "@chakra-ui/hooks";
@@ -18,6 +17,10 @@ import {
   LocalStorageCache,
   SourceResolver,
 } from "monaco-editor-auto-typings/custom-editor";
+import { useEditor, Editor } from "../components/ui/editor";
+import { ModelFile } from "../components/ui/models";
+import { PackageDeclarations } from "../components/ui/declarations";
+import { InitializationStatus } from "../state/runners/runner";
 
 export class UnpkgSourceResolver implements SourceResolver {
   emulator: Emulator;
@@ -85,38 +88,6 @@ const useProject = () => {
   return project;
 };
 
-const ModelFile = ({ path, contents, isDisabled }: any) => {
-  const monaco = useMonaco();
-  const disabledRef = useLatestRef(isDisabled);
-
-  useEffect(() => {
-    if (!monaco || disabledRef.current) return;
-    let model = monaco.editor.getModel(monaco.Uri.file(path));
-    if (!model) {
-      model = monaco.editor.createModel(
-        contents,
-        undefined,
-        monaco.Uri.file(path)
-      );
-    } else {
-      model.setValue(contents);
-    }
-  }, [monaco, path, contents]);
-
-  useEffect(() => {
-    if (!monaco || disabledRef.current) return;
-    // if path changes, dispose of model for old path
-    return () => {
-      let model = monaco.editor.getModel(monaco.Uri.file(path));
-      if (model && !model.isDisposed()) {
-        model.dispose();
-      }
-    };
-  }, [monaco, path]);
-
-  return null;
-};
-
 const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
   if (
     !project.example.runner.url ||
@@ -137,7 +108,7 @@ const TestsPreview = observer(({ project }: { project: ProjectManager }) => {
   if (!project.tests.runner.results) {
     return null;
   }
-  return <pre>{JSON.stringify(project.tests.runner.results)}</pre>;
+  return <pre>{JSON.stringify(project.tests.runner.results, null, 2)}</pre>;
 });
 
 const AppTabs = observer(({ project }: any) => {
@@ -283,40 +254,38 @@ const Home = () => {
                   );
 
                   project.example.runner.initialization.then(() => {
-                    AutoTypings.create(editor, {
-                      monaco,
-                      // sourceCache: new LocalStorageCache(),
-                      shareCache: true,
-                      fileRootPath: "file:///",
-                      preloadPackages: true,
-                      onlySpecifiedPackages: true,
-                      versions: {
-                        ...project.activeApp.packageJson?.dependencies,
-                        ...project.activeApp.packageJson?.devDependencies,
-                        [project.library.packageJson.name]: "latest",
-                      },
-
-                      sourceResolver: new UnpkgSourceResolver(project.emulator),
-                      onError: console.error,
-                      onUpdate: console.log,
-                    }).then(() => {
-                      console.log("Watching package declarations.");
-                    });
-
-                    project.emulator
-                      .get(
-                        `/app/package?path=${encodeURIComponent(
-                          "@types/react/index.d.ts"
-                        )}`
-                      )
-                      .then((result: any) => {
-                        if (result?.contents) {
-                          monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                            result.contents,
-                            "file:///node_modules/@types/react/index.d.ts"
-                          );
-                        }
-                      });
+                    // AutoTypings.create(editor, {
+                    //   monaco,
+                    //   // sourceCache: new LocalStorageCache(),
+                    //   shareCache: true,
+                    //   fileRootPath: "file:///",
+                    //   preloadPackages: true,
+                    //   onlySpecifiedPackages: true,
+                    //   versions: {
+                    //     ...project.activeApp.packageJson?.dependencies,
+                    //     ...project.activeApp.packageJson?.devDependencies,
+                    //     [project.library.packageJson.name]: "latest",
+                    //   },
+                    //   sourceResolver: new UnpkgSourceResolver(project.emulator),
+                    //   onError: console.error,
+                    //   onUpdate: console.log,
+                    // }).then(() => {
+                    //   console.log("Watching package declarations.");
+                    // });
+                    // project.emulator
+                    //   .get(
+                    //     `/app/package?path=${encodeURIComponent(
+                    //       "@types/react/index.d.ts"
+                    //     )}`
+                    //   )
+                    //   .then((result: any) => {
+                    //     if (result?.contents) {
+                    //       monaco.languages.typescript.typescriptDefaults.addExtraLib(
+                    //         result.contents,
+                    //         "file:///node_modules/@types/react/index.d.ts"
+                    //       );
+                    //     }
+                    //   });
                   });
                 }}
                 onChange={(val) => {
@@ -329,15 +298,30 @@ const Home = () => {
                   automaticLayout: true,
                   scrollBeyondLastLine: false,
                 }}
-              />
-              {project.activeApp.files.map((file) => (
-                <ModelFile
-                  key={file.id}
-                  path={file.path}
-                  contents={file.contents}
-                  isDisabled={project.activeApp.activeFileId === file.id}
-                />
-              ))}
+              >
+                {project.activeApp.files.map((file) => (
+                  <ModelFile
+                    key={file.id}
+                    path={file.path}
+                    contents={file.contents}
+                    isDisabled={project.activeApp.activeFileId === file.id}
+                  />
+                ))}
+                {project.example.runner.initializationStatus ===
+                  InitializationStatus.Initialized && (
+                  <>
+                    {Object.keys(project.activeApp.dependencies).map(
+                      (packageName) => (
+                        <PackageDeclarations
+                          key={packageName}
+                          packageName={packageName}
+                          project={project}
+                        />
+                      )
+                    )}
+                  </>
+                )}
+              </Editor>
             </div>
           </div>
         </div>

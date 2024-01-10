@@ -88,15 +88,7 @@ export class ProjectManager {
     this.initCount++;
     const result = await this.library.init();
     await Promise.all([
-      this.example.init(result.packageId).then(() => {
-        // this.emulator
-        //   .get(
-        //     `/app/declarations?packageName=${encodeURIComponent(
-        //       "@types/react"
-        //     )}`
-        //   )
-        //   .then(console.log);
-      }),
+      this.example.init(result.packageId),
       this.tests.init(result.packageId),
     ]);
   }

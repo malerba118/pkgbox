@@ -7,6 +7,7 @@ import { debounce } from "lodash";
 
 export interface BuildResult {
   packageId: string;
+  buildCount: number;
 }
 
 enum ServerStatus {
@@ -18,6 +19,7 @@ enum ServerStatus {
 
 export class LibraryRunner extends Runner {
   events = new EventEmitter();
+  buildCount = 0;
 
   constructor(emulator: Emulator) {
     super(emulator);
@@ -49,7 +51,8 @@ export class LibraryRunner extends Runner {
 
   build = async (): Promise<BuildResult> => {
     const result = await this.emulator.post("/library/build");
-    this.events.emit("build", result);
+    this.buildCount++;
+    this.events.emit("build", { ...result, buildCount: this.buildCount });
     return result;
   };
 

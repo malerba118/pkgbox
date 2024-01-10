@@ -65,8 +65,12 @@ export class ExampleRunner extends Runner {
       "--prefix",
       ".app",
       "install",
+      "--no-audit",
+      "--no-fund",
+      // "--no-package-lock",
       ...dependencies,
     ]);
+    return this.installProcess.exit;
     // return this.emulator.post("/app/install", { dependencies, options });
   };
 
