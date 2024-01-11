@@ -9,50 +9,12 @@ import { observer } from "mobx-react";
 import { useLatestRef } from "@chakra-ui/hooks";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Emulator } from "../state/runners/emulator";
-import { autorun, when } from "mobx";
 import { VANILLA_TEMPLATE } from "../templates/vanilla";
 import { ServerStatus } from "../state/runners/example";
-import {
-  AutoTypings,
-  LocalStorageCache,
-  SourceResolver,
-} from "monaco-editor-auto-typings/custom-editor";
-import { useEditor, Editor } from "../components/ui/editor";
+import { Editor } from "../components/ui/editor";
 import { ModelFile } from "../components/ui/models";
 import { PackageDeclarations } from "../components/ui/declarations";
 import { InitializationStatus } from "../state/runners/runner";
-
-export class UnpkgSourceResolver implements SourceResolver {
-  emulator: Emulator;
-
-  constructor(emulator: Emulator) {
-    this.emulator = emulator;
-  }
-
-  public async resolvePackageJson(
-    packageName: string,
-    version: string | undefined,
-    subPath: string | undefined
-  ): Promise<string | undefined> {
-    const path = packageName + (subPath ? `/${subPath}` : "") + "/package.json";
-    const result = await this.emulator.get(
-      `/app/package?path=${encodeURIComponent(path)}`
-    );
-    return result.contents;
-  }
-
-  public async resolveSourceFile(
-    packageName: string,
-    version: string | undefined,
-    path: string
-  ): Promise<string | undefined> {
-    const _path = packageName + (path ? `/${path}` : "");
-    const result = await this.emulator.get(
-      `/app/package?path=${encodeURIComponent(_path)}`
-    );
-    return result.contents;
-  }
-}
 
 const emulatorPromise = Emulator.create();
 
@@ -186,35 +148,6 @@ const Home = () => {
                   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(
                     true
                   );
-                  // const rawCompilerOptions =
-                  //   project.activeApp.typescriptConfig?.compilerOptions || {};
-                  // // Map tsConfig to Monaco Editor settings
-                  // const monacoCompilerOptions = {
-                  //   target: monaco.languages.typescript.ScriptTarget.ESNext,
-                  //   moduleResolution:
-                  //     monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-                  //   allowNonTsExtensions:
-                  //     rawCompilerOptions.allowNonTsExtensions ?? true,
-                  //   noImplicitAny: rawCompilerOptions.noImplicitAny ?? false,
-                  //   strictNullChecks:
-                  //     rawCompilerOptions.strictNullChecks ?? false,
-                  //   strictFunctionTypes:
-                  //     rawCompilerOptions.strictFunctionTypes ?? false,
-                  //   strictPropertyInitialization:
-                  //     rawCompilerOptions.strictPropertyInitialization ?? false,
-                  //   noEmit: rawCompilerOptions.noEmit ?? true,
-                  //   esModuleInterop:
-                  //     rawCompilerOptions.esModuleInterop ?? false,
-                  //   experimentalDecorators:
-                  //     rawCompilerOptions.experimentalDecorators ?? false,
-                  //   allowJs: rawCompilerOptions.allowJs ?? false,
-                  //   typeRoots: rawCompilerOptions.typeRoots ?? [],
-                  //   baseUrl: rawCompilerOptions.baseUrl ?? ".",
-                  //   paths: rawCompilerOptions.paths ?? {},
-                  //   jsx: rawCompilerOptions.jsx,
-                  //   allowImportingTsExtensions:
-                  //     rawCompilerOptions.allowImportingTsExtensions ?? true,
-                  // };
                   const compilerOptions = {
                     target: monaco.languages.typescript.ScriptTarget.Latest,
                     allowNonTsExtensions: true,
@@ -252,41 +185,6 @@ const Home = () => {
                       editor.getAction("editor.action.formatDocument")?.run();
                     }
                   );
-
-                  project.example.runner.initialization.then(() => {
-                    // AutoTypings.create(editor, {
-                    //   monaco,
-                    //   // sourceCache: new LocalStorageCache(),
-                    //   shareCache: true,
-                    //   fileRootPath: "file:///",
-                    //   preloadPackages: true,
-                    //   onlySpecifiedPackages: true,
-                    //   versions: {
-                    //     ...project.activeApp.packageJson?.dependencies,
-                    //     ...project.activeApp.packageJson?.devDependencies,
-                    //     [project.library.packageJson.name]: "latest",
-                    //   },
-                    //   sourceResolver: new UnpkgSourceResolver(project.emulator),
-                    //   onError: console.error,
-                    //   onUpdate: console.log,
-                    // }).then(() => {
-                    //   console.log("Watching package declarations.");
-                    // });
-                    // project.emulator
-                    //   .get(
-                    //     `/app/package?path=${encodeURIComponent(
-                    //       "@types/react/index.d.ts"
-                    //     )}`
-                    //   )
-                    //   .then((result: any) => {
-                    //     if (result?.contents) {
-                    //       monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                    //         result.contents,
-                    //         "file:///node_modules/@types/react/index.d.ts"
-                    //       );
-                    //     }
-                    //   });
-                  });
                 }}
                 onChange={(val) => {
                   project.activeApp.activeFile?.setContents(val || "");
@@ -313,7 +211,8 @@ const Home = () => {
                     {Object.keys(project.activeApp.dependencies).map(
                       (packageName) => (
                         <PackageDeclarations
-                          key={packageName}
+                          key={packageName + project.activeAppId}
+                          appName={project.activeAppId}
                           packageName={packageName}
                           project={project}
                         />

@@ -27,11 +27,13 @@ const DeclarationFile = ({ path, contents }: DeclarationFileProps) => {
 };
 
 interface PackageDeclarationsProps {
+  appName: string;
   packageName: string;
   project: ProjectManager;
 }
 
 export const PackageDeclarations = ({
+  appName,
   packageName,
   project,
 }: PackageDeclarationsProps) => {
@@ -39,12 +41,13 @@ export const PackageDeclarations = ({
 
   useEffect(() => {
     project.emulator
-      .get(`/app/declarations/${encodeURIComponent(packageName)}`)
+      .get(`/${appName}/declarations/${encodeURIComponent(packageName)}`)
       .then(setFileMap);
   }, [packageName]);
 
   return Object.entries(fileMap).map(([path, file]) => (
     <DeclarationFile
+      key={path}
       path={`file:///node_modules/${packageName}${path}`}
       contents={file.code}
     />

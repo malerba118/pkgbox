@@ -2,6 +2,7 @@ import { makeObservable, observable, runInAction, when } from "mobx";
 import { Emulator, EmulatorFiles } from "./emulator";
 import { WebContainerProcess } from "@webcontainer/api";
 import { InitializationStatus, Runner } from "./runner";
+import { debounce } from "lodash";
 
 interface InstallOptions {
   force?: boolean;
@@ -20,7 +21,14 @@ export class TestsRunner extends Runner {
     });
   }
 
+  debounced = {
+    updateFiles: debounce((files: EmulatorFiles) => {
+      this.updateFiles(files);
+    }, 1000),
+  };
+
   init = async (files: EmulatorFiles, packageId: string) => {
+    console.log("Initializing tests");
     this.setInitializationStatus(InitializationStatus.Initializating);
     await this.updateFiles(files);
     await this.install([packageId]);
@@ -43,27 +51,32 @@ export class TestsRunner extends Runner {
     this.setInitializationStatus(InitializationStatus.Initialized);
   };
 
-  updateFiles = async (files: EmulatorFiles) => {
+  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+    console.log("Updating tests files");
     return this.emulator.post("/tests/files", files);
-  };
+  });
 
-  install = async (
-    dependencies: string[] = [],
-    options: InstallOptions = { force: false }
-  ) => {
-    this.installProcess?.kill();
-    this.installProcess = await this.emulator.run("npm", [
-      "--prefix",
-      ".tests",
-      "install",
-      "--no-audit",
-      "--no-fund",
-      // "--no-package-lock",
-      ...dependencies,
-    ]);
-    return this.installProcess.exit;
-    // return this.emulator.post("/tests/install", { dependencies, options });
-  };
+  install = this.AsyncQueue.Fn(
+    async (
+      dependencies: string[] = [],
+      options: InstallOptions = { force: false }
+    ) => {
+      console.log("Install tests dependencies");
+      this.installProcess?.kill();
+      this.installProcess = await this.emulator.run("npm", [
+        "--prefix",
+        ".tests",
+        "install",
+        "--no-audit",
+        "--no-fund",
+        "--no-progress",
+        // "--no-package-lock",
+        ...dependencies,
+      ]);
+      return this.installProcess.exit;
+      // return this.emulator.post("/tests/install", { dependencies, options });
+    }
+  );
 
   start = async () => {
     await this.initialization;

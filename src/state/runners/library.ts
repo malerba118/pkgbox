@@ -4,6 +4,7 @@ import { InitializationStatus, Runner } from "./runner";
 import EventEmitter from "eventemitter3";
 import { Subscriber } from "../types";
 import { debounce } from "lodash";
+import { createAsyncQueue } from "../../lib/async";
 
 export interface BuildResult {
   packageId: string;
@@ -30,10 +31,11 @@ export class LibraryRunner extends Runner {
       this.updateFiles(files).then(() => {
         this.build();
       });
-    }, 700),
+    }, 1000),
   };
 
   init = async (files: EmulatorFiles) => {
+    console.log("Initializing library");
     this.setInitializationStatus(InitializationStatus.Initializating);
     await this.updateFiles(files);
     const result = await this.build();
@@ -41,20 +43,17 @@ export class LibraryRunner extends Runner {
     return result;
   };
 
-  updateFiles = async (files: EmulatorFiles) => {
+  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+    console.log("Updating library files");
     return this.emulator.post("/library/files", files);
-  };
+  });
 
-  install = async (dependency?: string) => {
-    return this.emulator.post("/library/install", dependency);
-  };
-
-  build = async (): Promise<BuildResult> => {
+  build = this.AsyncQueue.Fn(async (): Promise<BuildResult> => {
     const result = await this.emulator.post("/library/build");
     this.buildCount++;
     this.events.emit("build", { ...result, buildCount: this.buildCount });
     return result;
-  };
+  });
 
   onBuild = (subscriber: Subscriber<BuildResult>) => {
     this.events.on("build", subscriber);

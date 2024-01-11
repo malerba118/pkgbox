@@ -2,6 +2,7 @@ import { reaction } from "mobx";
 import { App, AppManager } from "./app";
 import { ProjectManager } from "./project";
 import { ExampleRunner } from "./runners/example";
+import { InitializationStatus } from "./runners/runner";
 
 export class ExampleManager extends AppManager {
   runner: ExampleRunner;
@@ -10,9 +11,13 @@ export class ExampleManager extends AppManager {
     super(data, project);
     this.runner = new ExampleRunner(this.project.emulator);
     reaction(
-      () => JSON.stringify(this.toFileMap()),
+      () => this.toFileMap(),
       () => {
-        this.runner.debounced.updateFiles(this.toFileMap());
+        if (
+          this.runner.initializationStatus === InitializationStatus.Initialized
+        ) {
+          this.runner.debounced.updateFiles(this.toFileMap());
+        }
       },
       {
         fireImmediately: false,

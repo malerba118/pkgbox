@@ -36,7 +36,7 @@ export class ExampleRunner extends Runner {
   debounced = {
     updateFiles: debounce((files: EmulatorFiles) => {
       this.updateFiles(files);
-    }, 700),
+    }, 1000),
   };
 
   setServerStatus(status: ServerStatus) {
@@ -44,6 +44,7 @@ export class ExampleRunner extends Runner {
   }
 
   init = async (files: EmulatorFiles, packageId: string) => {
+    console.log("Initializing example");
     this.setInitializationStatus(InitializationStatus.Initializating);
     await this.updateFiles(files);
     await this.install([packageId]);
@@ -51,41 +52,39 @@ export class ExampleRunner extends Runner {
     // await this.startServer();
   };
 
-  updateFiles = async (files: EmulatorFiles) => {
-    return this.emulator.post("/app/files", files);
-  };
+  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+    console.log("Updating example files");
+    return this.emulator.post("/example/files", files);
+  });
 
-  install = async (
-    dependencies: string[] = [],
-    options: InstallOptions = { force: false }
-  ) => {
-    console.log("installing app dependencies: " + dependencies.join(","));
-    this.installProcess?.kill();
-    this.installProcess = await this.emulator.run("npm", [
-      "--prefix",
-      ".app",
-      "install",
-      "--no-audit",
-      "--no-fund",
-      // "--no-package-lock",
-      ...dependencies,
-    ]);
-    return this.installProcess.exit;
-    // return this.emulator.post("/app/install", { dependencies, options });
-  };
+  install = this.AsyncQueue.Fn(
+    async (
+      dependencies: string[] = [],
+      options: InstallOptions = { force: false }
+    ) => {
+      console.log("Installing example dependencies");
+      this.installProcess?.kill();
+      this.installProcess = await this.emulator.run("npm", [
+        "--prefix",
+        ".example",
+        "install",
+        "--no-audit",
+        "--no-fund",
+        "--no-progress",
+        // "--no-package-lock",
+        ...dependencies,
+      ]);
+      return this.installProcess.exit;
+    }
+  );
 
   start = async () => {
-    // if (
-    //   this.serverStatus === ServerStatus.Starting
-    // ) {
-    //   return;
-    // }
     this.setServerStatus(ServerStatus.Starting);
     await this.initialization;
     this.stop();
     this.serverProcess = await this.emulator.run("npm", [
       "--prefix",
-      ".app",
+      ".example",
       "run",
       "dev",
     ]);

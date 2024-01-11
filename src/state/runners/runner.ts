@@ -1,5 +1,6 @@
 import { action, makeObservable, observable, when } from "mobx";
 import { Emulator } from "./emulator";
+import { createAsyncQueue } from "../../lib/async";
 
 export enum InitializationStatus {
   Uninitialized = "uninitialized",
@@ -11,6 +12,7 @@ export enum InitializationStatus {
 export abstract class Runner {
   emulator: Emulator;
   initialization: Promise<void>;
+  AsyncQueue = createAsyncQueue();
 
   abstract init(...args: any[]): Promise<any>;
   initializationStatus: InitializationStatus;

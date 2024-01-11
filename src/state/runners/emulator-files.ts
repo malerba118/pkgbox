@@ -31,8 +31,8 @@ export const files = {
           const cwd = process.cwd()
           const libraryDir = path.join(cwd, '.library');
           fs.mkdirSync(libraryDir);
-          const appDir = path.join(cwd, '.app');
-          fs.mkdirSync(appDir);
+          const exampleDir = path.join(cwd, '.example');
+          fs.mkdirSync(exampleDir);
           const testsDir = path.join(cwd, '.tests');
           fs.mkdirSync(testsDir);
       
@@ -144,7 +144,7 @@ export const files = {
         
                 if (packageJsonUpdated) {
                     console.log('Updating dependencies...');
-                    const result = cp.spawnSync('npm', ['install'], { cwd: libraryDir, stdio: DEBUG ? 'inherit' : null });
+                    const result = cp.spawnSync('npm', ['install', '--no-progress'], { cwd: libraryDir, stdio: DEBUG ? 'inherit' : null });
                     if (result.error) {
                         throw result.error;
                     }
@@ -192,15 +192,45 @@ export const files = {
                 res.status(500).send({ error: 'Bundling failed', details: error.message });
             }
         });
+
+        app.get('/library/declarations/:packageName', async (req, res) => {
+            const packageName = req.params.packageName;
+            if (!packageName) {
+                return res.status(400).send({ error: 'No package name provided' });
+            }
+        
+            try {
+                const decodedPackageName = decodeURIComponent(packageName);
+                const packagePath = path.join(libraryDir, 'node_modules', decodedPackageName);
+        
+                if (!fs.existsSync(packagePath)) {
+                    return res.status(404).send({ error: 'Package not found' });
+                }
+        
+                const declarationFiles = readDeclarationFiles(packagePath);
+        
+                // Read the package.json file without parsing it
+                const packageJsonPath = path.join(packagePath, 'package.json');
+                if (fs.existsSync(packageJsonPath)) {
+                    const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
+                    const relativePath = \`/\${path.relative(packagePath, packageJsonPath)}\`;
+                    declarationFiles[relativePath] = { code: packageJsonContents };
+                }
+        
+                res.json(declarationFiles);
+            } catch (error) {
+                res.status(500).send({ error: 'Error processing request', details: error.message });
+            }
+        });
   
-        app.post('/app/files', async (req, res) => {     
+        app.post('/example/files', async (req, res) => {     
           let packageJsonUpdated = false;
       
           try {
               const files = req.body
               for (const filePath in files) {
                   const normalizedPath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
-                  const fullPath = path.join(appDir, normalizedPath);
+                  const fullPath = path.join(exampleDir, normalizedPath);
                   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
       
                   const newContent = files[filePath].code;
@@ -226,19 +256,19 @@ export const files = {
       
               if (packageJsonUpdated) {
                   console.log('Updating dependencies...');
-                  const result = cp.spawnSync('npm', ['install'], { cwd: appDir, stdio: DEBUG ? 'inherit' : null });
+                  const result = cp.spawnSync('npm', ['install', '--no-progress'], { cwd: exampleDir, stdio: DEBUG ? 'inherit' : null });
                   if (result.error) {
                       throw result.error;
                   }
               }
       
-              res.send({ message: 'Files written to .app directory' });
+              res.send({ message: 'Files written to .example directory' });
           } catch (error) {
               res.status(500).send({ error: 'Error processing files', details: error.message });
           }
       });
 
-      app.get('/app/package', async (req, res) => {
+      app.get('/example/package', async (req, res) => {
         const packagePath = req.query.path;
         if (!packagePath) {
             return res.status(400).send({ error: 'No path provided' });
@@ -247,7 +277,7 @@ export const files = {
         try {
             const decodedPath = decodeURIComponent(packagePath);
     
-            const filePath = path.join(appDir, 'node_modules', decodedPath);
+            const filePath = path.join(exampleDir, 'node_modules', decodedPath);
             if (!fs.existsSync(filePath)) {
                 return res.status(404).send({ error: 'File not found' });
             }
@@ -259,28 +289,8 @@ export const files = {
         }
     });
 
-    // app.get('/app/declarations/:packageName', async (req, res) => {
-    //     const packageName = req.params.packageName;
-    //     if (!packageName) {
-    //         return res.status(400).send({ error: 'No package name provided' });
-    //     }
-    
-    //     try {
-    //         const decodedPackageName = decodeURIComponent(packageName);
-    //         const packagePath = path.join(appDir, 'node_modules', decodedPackageName);
-    
-    //         if (!fs.existsSync(packagePath)) {
-    //             return res.status(404).send({ error: 'Package not found' });
-    //         }
-    
-    //         const declarationFiles = readDeclarationFiles(packagePath);
-    //         res.json(declarationFiles);
-    //     } catch (error) {
-    //         res.status(500).send({ error: 'Error processing request', details: error.message });
-    //     }
-    // });
 
-    app.get('/app/declarations/:packageName', async (req, res) => {
+    app.get('/example/declarations/:packageName', async (req, res) => {
         const packageName = req.params.packageName;
         if (!packageName) {
             return res.status(400).send({ error: 'No package name provided' });
@@ -288,7 +298,7 @@ export const files = {
     
         try {
             const decodedPackageName = decodeURIComponent(packageName);
-            const packagePath = path.join(appDir, 'node_modules', decodedPackageName);
+            const packagePath = path.join(exampleDir, 'node_modules', decodedPackageName);
     
             if (!fs.existsSync(packagePath)) {
                 return res.status(404).send({ error: 'Package not found' });
@@ -342,7 +352,7 @@ export const files = {
       
               if (packageJsonUpdated) {
                   console.log('Updating dependencies...');
-                  const result = cp.spawnSync('npm', ['install'], { cwd: testsDir, stdio: DEBUG ? 'inherit' : null });
+                  const result = cp.spawnSync('npm', ['install', '--no-progress'], { cwd: testsDir, stdio: DEBUG ? 'inherit' : null });
                   if (result.error) {
                       throw result.error;
                   }
@@ -353,6 +363,37 @@ export const files = {
               res.status(500).send({ error: 'Error processing files', details: error.message });
           }
       });
+
+
+      app.get('/tests/declarations/:packageName', async (req, res) => {
+        const packageName = req.params.packageName;
+        if (!packageName) {
+            return res.status(400).send({ error: 'No package name provided' });
+        }
+    
+        try {
+            const decodedPackageName = decodeURIComponent(packageName);
+            const packagePath = path.join(testsDir, 'node_modules', decodedPackageName);
+    
+            if (!fs.existsSync(packagePath)) {
+                return res.status(404).send({ error: 'Package not found' });
+            }
+    
+            const declarationFiles = readDeclarationFiles(packagePath);
+    
+            // Read the package.json file without parsing it
+            const packageJsonPath = path.join(packagePath, 'package.json');
+            if (fs.existsSync(packageJsonPath)) {
+                const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
+                const relativePath = \`/\${path.relative(packagePath, packageJsonPath)}\`;
+                declarationFiles[relativePath] = { code: packageJsonContents };
+            }
+    
+            res.json(declarationFiles);
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
     
           
         app.listen(port, () => {

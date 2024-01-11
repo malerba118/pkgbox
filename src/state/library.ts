@@ -4,6 +4,7 @@ import { FileMap } from "./types";
 import { LibraryRunner } from "./runners/library";
 import { debounce } from "lodash";
 import { reaction } from "mobx";
+import { InitializationStatus } from "./runners/runner";
 
 export class LibraryManager extends AppManager {
   runner: LibraryRunner;
@@ -12,9 +13,13 @@ export class LibraryManager extends AppManager {
     super(data, project);
     this.runner = new LibraryRunner(this.project.emulator);
     reaction(
-      () => JSON.stringify(this.toFileMap()),
+      () => this.toFileMap(),
       () => {
-        this.runner.debounced.updateFilesAndBuild(this.toFileMap());
+        if (
+          this.runner.initializationStatus === InitializationStatus.Initialized
+        ) {
+          this.runner.debounced.updateFilesAndBuild(this.toFileMap());
+        }
       },
       {
         fireImmediately: false,

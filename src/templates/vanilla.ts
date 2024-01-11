@@ -245,7 +245,22 @@ export const VANILLA_TEMPLATE: Template = {
       code: "# Vitest Demo\n\nRun `npm test` and change a test or source code to see HMR in action!\n\nLearn more at https://vitest.dev\n",
     },
     "/package.json": {
-      code: '{\n  "name": "@vitest/tests",\n  "type": "module",\n  "private": true,\n  "license": "MIT",\n  "main": "index.js",\n  "scripts": {\n    "test": "vitest"\n  },\n  "devDependencies": {\n    "vite": "latest",\n    "vitest": "latest"\n  }\n}\n',
+      code: `{
+  "name": "@vitest/tests",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vite": "latest",
+    "vitest": "latest",
+    "math": "file:../../math-0.0.0.tgz"
+  }
+}
+`,
     },
     "/tests/math.test.ts": {
       code: 'import { assert, expect, test } from "vitest";\nimport { add, subtract } from "math";\n\ntest("Add", () => {\n  expect(add(1, 1)).toBe(2);\n});\n\ntest("Subtract", () => {\n  expect(subtract(15, 3)).toBe(12);\n});\n',
