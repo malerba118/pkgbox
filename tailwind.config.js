@@ -79,5 +79,29 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    ({ addBase }) => {
+      addBase({
+        ".stack": {
+          display: "flex",
+          flexDirection: "column",
+        },
+        ".hstack": {
+          display: "flex",
+          flexDirection: "row",
+        },
+        ".center": {
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        ".overlay": {
+          position: "absolute",
+          inset: 0,
+        },
+      });
+    },
+  ],
 };
