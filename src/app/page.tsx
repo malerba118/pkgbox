@@ -61,7 +61,7 @@ const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
   return (
     <iframe
       src={project.example.runner.url}
-      className="h-full w-full bg-red-300"
+      className="absolute h-full w-full bg-red-300"
     />
   );
 });
@@ -70,7 +70,11 @@ const TestsPreview = observer(({ project }: { project: ProjectManager }) => {
   if (!project.tests.runner.results) {
     return null;
   }
-  return <pre>{JSON.stringify(project.tests.runner.results, null, 2)}</pre>;
+  return (
+    <div className="absolute w-full h-full overflow-auto">
+      <pre>{JSON.stringify(project.tests.runner.results, null, 2)}</pre>
+    </div>
+  );
 });
 
 const AppTabs = observer(({ project }: any) => {
@@ -80,6 +84,9 @@ const AppTabs = observer(({ project }: any) => {
       value={project.activeAppId}
       onValueChange={(val) => {
         project.setActiveAppId(val);
+        if (val === "example" || val === "tests") {
+          project.setActivePreview(val);
+        }
       }}
     >
       <TabsList className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden">
@@ -224,9 +231,9 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div className="stack flex-1">
+        <div className="stack flex-1 min-w-0">
           <PreviewTabs project={project} />
-          <div className="flex-1">
+          <div className="relative flex-1">
             {project.activePreview === "example" ? (
               <ExamplePreview project={project} />
             ) : (

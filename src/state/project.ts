@@ -19,7 +19,7 @@ export class ProjectManager {
   constructor(data: Project, emulator: Emulator) {
     this.id = data.id;
     this.name = data.name;
-    this.activeAppId = "example";
+    this.activeAppId = "library";
     this.activePreview = "example";
     this.emulator = emulator;
     this.library = new LibraryManager(
@@ -48,6 +48,7 @@ export class ProjectManager {
       setActiveAppId: action,
       activePreview: observable.ref,
       setActivePreview: action,
+      createFilesFromTemplate: action,
     });
     this.library.runner.onBuild(async (result) => {
       if (this.activePreview === "example") {
@@ -116,7 +117,10 @@ export class ProjectManager {
 
   createFilesFromTemplate(template: Template) {
     this.library.createFilesFromFileMap(template.library);
+    this.library.setActiveFileId(this.library.entrypoint?.id || null);
     this.example.createFilesFromFileMap(template.example);
+    this.example.setActiveFileId(this.example.entrypoint?.id || null);
     this.tests.createFilesFromFileMap(template.tests);
+    this.tests.setActiveFileId(this.tests.entrypoint?.id || null);
   }
 }

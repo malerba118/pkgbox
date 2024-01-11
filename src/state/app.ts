@@ -55,7 +55,25 @@ export abstract class AppManager {
     return this.activeFileId ? this.filesById[this.activeFileId] : null;
   }
 
-  setActiveFileId(fileId: string) {
+  get entrypoint(): FileManager | null {
+    // console.log(this.packageJson);
+    // return this.packageJson?.main
+    //   ? this.getFileFromPath(this.packageJson?.main) || this.files[0]
+    //   : this.files[0];
+    const rootFiles = this.files.filter((file) => file.folder_id === "root");
+    return (
+      rootFiles.find(
+        (file) =>
+          file.name.includes("index") ||
+          file.name.includes("app") ||
+          file.name.includes("main")
+      ) ||
+      rootFiles[0] ||
+      null
+    );
+  }
+
+  setActiveFileId(fileId: string | null) {
     this.activeFileId = fileId;
   }
 
