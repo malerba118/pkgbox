@@ -150,7 +150,7 @@ export const getFiles = (options: TemplateOptions) => {
     ...files,
     "package.json": { code: JSON.stringify(pkg, null, 2) },
     "src/App.tsx": {
-      code: getAppTsx(options),
+      code: getAppTsx(options) as string,
     },
   };
 };
