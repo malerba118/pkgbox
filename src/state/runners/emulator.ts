@@ -17,13 +17,13 @@ export class Emulator {
 
   run = async (command: string, args: string[], options?: SpawnOptions) => {
     const process = await this.container.spawn(command, args, options);
-    // process.output.pipeTo(
-    //   new WritableStream({
-    //     write(data) {
-    //       console.log(data);
-    //     },
-    //   })
-    // );
+    process.output.pipeTo(
+      new WritableStream({
+        write(data) {
+          console.log(data);
+        },
+      })
+    );
     return process;
   };
 

@@ -10,7 +10,7 @@ export const files = {
           import os from 'os';
           import path from 'path';
   
-          const DEBUG = false
+          const DEBUG = true
   
           const printDir = (dir) => cp.spawnSync('ls', ['-a'], { cwd: dir, stdio: DEBUG ? 'inherit' : null });
           function printFile(filePath) {

@@ -3,118 +3,25 @@ import { Template } from "../../state/types";
 export const VANILLA_TEMPLATE: Template = {
   library: {
     "/index.ts": {
-      code: `export { add } from './add';
-export { subtract } from './subtract';`,
+      code: require("!!raw-loader!./library/index.ts").default,
     },
     "/add.ts": {
-      code: `export function add(a: number, b: number): number {
-    return a + b;
-}`,
+      code: require("!!raw-loader!./library/add.ts").default,
     },
     "/subtract.ts": {
-      code: `export function subtract(a: number, b: number): number {
-    return a - b;
-}`,
+      code: require("!!raw-loader!./library/subtract.ts").default,
+    },
+    "/key-by.ts": {
+      code: require("!!raw-loader!./library/key-by.ts").default,
     },
     "/package.json": {
-      code: JSON.stringify(
-        {
-          name: "math",
-          version: "0.0.0",
-          main: "index.ts",
-          devDependencies: {
-            esbuild: "latest",
-            rollup: "latest",
-            "rollup-plugin-esbuild": "latest",
-            "rollup-plugin-dts": "latest",
-          },
-          scripts: {
-            build: "rollup -c",
-          },
-        },
-        null,
-        4
-      ),
+      code: require("!!raw-loader!./library/package.json").default,
     },
     "/tsconfig.json": {
-      code: JSON.stringify(
-        {
-          compilerOptions: {
-            target: "esnext",
-            module: "esnext",
-            moduleResolution: "bundler",
-            jsx: "react",
-            declaration: true,
-            strict: true,
-            esModuleInterop: true,
-            skipLibCheck: true,
-            forceConsistentCasingInFileNames: true,
-          },
-          include: ["./**/*"],
-          exclude: ["node_modules", "**/*.spec.ts", "dist/**/*"],
-        },
-        null,
-        4
-      ),
+      code: require("!!raw-loader!./library/tsconfig.json").default,
     },
     "/rollup.config.mjs": {
-      code: `import dts from 'rollup-plugin-dts';
-import esbuild from 'rollup-plugin-esbuild';
-import fs from 'fs'
-
-const rawData = fs.readFileSync('./package.json');
-const packageJson = JSON.parse(rawData);
-
-// Custom Rollup plugin to copy and modify package.json
-const copyPackageJson = () => ({
-    name: 'copy-package-json',
-    generateBundle() {
-        const modifiedPackageJson = {
-            ...packageJson,
-            main: 'index.js',
-            module: 'index.mjs',
-            typings: 'index.d.ts',
-        };
-        this.emitFile({
-            type: 'asset',
-            fileName: 'package.json',
-            source: JSON.stringify(modifiedPackageJson, null, 2),
-        });
-    }
-});
-
-
-const bundle = config => ({
-    ...config,
-    input: packageJson.main || 'index.ts',
-    external: id => !/^[./]/.test(id),
-});
-
-export default [
-    bundle({
-        plugins: [esbuild(), copyPackageJson()],
-        output: [
-            {
-                file: \`dist/index.js\`,
-                format: 'cjs',
-                sourcemap: true,
-            },
-            {
-                file: \`dist/index.mjs\`,
-                format: 'es',
-                sourcemap: true,
-            },
-        ],
-    }),
-    bundle({
-        plugins: [dts()],
-        output: {
-            file: \`dist/index.d.ts\`,
-            format: 'es',
-        },
-    }),
-];
-          `,
+      code: require("!!raw-loader!./library/rollup.config.mjs").default,
     },
   },
   example: {
@@ -181,7 +88,7 @@ export default [
   "devDependencies": {
     "vite": "latest",
     "vitest": "latest",
-    "math": "file:../../math-0.0.0.tgz"
+    "math": "file:../math-0.0.0.tgz"
   }
 }
 `,
