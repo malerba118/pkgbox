@@ -10,11 +10,14 @@ import { useLatestRef } from "@chakra-ui/hooks";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Emulator } from "../state/runners/emulator";
 import { VANILLA_TEMPLATE } from "../templates/vanilla";
+import { getTemplate } from "@/templates";
 import { ServerStatus } from "../state/runners/example";
 import { Editor } from "../components/ui/editor";
 import { ModelFile } from "../components/ui/models";
 import { PackageDeclarations } from "../components/ui/declarations";
 import { InitializationStatus } from "../state/runners/runner";
+import { LibraryTemplateType } from "../templates/library";
+import { ExampleTemplateType } from "../templates/example";
 
 const emulatorPromise = Emulator.create();
 
@@ -35,7 +38,13 @@ const useProject = () => {
           },
           emulator
         );
-        project.createFilesFromTemplate(VANILLA_TEMPLATE);
+        project.createFilesFromTemplate(
+          getTemplate({
+            name: "math",
+            library: LibraryTemplateType.React,
+            example: ExampleTemplateType.React,
+          })
+        );
         setProject(project);
       }
     });
@@ -61,7 +70,7 @@ const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
   return (
     <iframe
       src={project.example.runner.url}
-      className="absolute h-full w-full bg-red-300"
+      className="absolute h-full w-full"
     />
   );
 });
