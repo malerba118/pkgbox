@@ -25,7 +25,7 @@ const copyPackageJson = () => ({
 
 export default [
   {
-    input: "index.ts",
+    input: "index.tsx",
     output: [
       {
         file: "dist/index.js",
@@ -41,7 +41,7 @@ export default [
     plugins: [esbuild(), copyPackageJson()],
   },
   {
-    input: "index.ts",
+    input: "index.tsx",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [dts()],
   },

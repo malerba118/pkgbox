@@ -2,80 +2,80 @@ import { Template } from "../../state/types";
 
 export const VANILLA_TEMPLATE: Template = {
   library: {
-    "/index.ts": {
-      code: require("!!raw-loader!./library/index.ts").default,
+    "index.tsx": {
+      code: require("!!raw-loader!./library/index.tsx").default,
     },
-    "/add.ts": {
+    "add.ts": {
       code: require("!!raw-loader!./library/add.ts").default,
     },
-    "/subtract.ts": {
+    "subtract.ts": {
       code: require("!!raw-loader!./library/subtract.ts").default,
     },
-    "/key-by.ts": {
+    "key-by.ts": {
       code: require("!!raw-loader!./library/key-by.ts").default,
     },
-    "/package.json": {
+    "package.json": {
       code: require("!!raw-loader!./library/package.json").default,
     },
-    "/tsconfig.json": {
+    "tsconfig.json": {
       code: require("!!raw-loader!./library/tsconfig.json").default,
     },
-    "/rollup.config.mjs": {
+    "rollup.config.mjs": {
       code: require("!!raw-loader!./library/rollup.config.mjs").default,
     },
   },
   example: {
-    "/.eslintrc.cjs": {
+    ".eslintrc.cjs": {
       code: require("!!raw-loader!./example/.eslintrc.cjs").default,
     },
-    "/.gitignore": {
+    ".gitignore": {
       code: require("!!raw-loader!./example/.gitignore").default,
     },
-    "/README.md": {
+    "README.md": {
       code: require("!!raw-loader!./example/README.md").default,
     },
-    "/index.html": {
+    "index.html": {
       code: require("!!raw-loader!./example/index.html").default,
     },
-    "/package.json": {
+    "package.json": {
       code: require("!!raw-loader!./example/package.json").default,
     },
-    "/public/vite.svg": {
+    "public/vite.svg": {
       code: require("!!raw-loader!./example/public/vite.svg").default,
     },
-    "/src/App.css": {
+    "src/App.css": {
       code: require("!!raw-loader!./example/src/App.css").default,
     },
-    "/src/App.tsx": {
+    "src/App.tsx": {
       code: require("!!raw-loader!./example/src/App.tsx").default,
     },
-    "/src/assets/react.svg": {
+    "src/assets/react.svg": {
       code: require("!!raw-loader!./example/src/assets/react.svg").default,
     },
-    "/src/index.css": {
+    "src/index.css": {
       code: require("!!raw-loader!./example/src/index.css").default,
     },
-    "/src/main.tsx": {
+    "src/main.tsx": {
       code: require("!!raw-loader!./example/src/main.tsx").default,
     },
-    "/src/vite-env.d.ts": {
+    "src/vite-env.d.ts": {
       code: require("!!raw-loader!./example/src/vite-env.d.ts").default,
     },
-    "/tsconfig.json": {
+    "tsconfig.json": {
       code: require("!!raw-loader!./example/tsconfig.json").default,
     },
-    "/tsconfig.node.json": {
+    "tsconfig.node.json": {
       code: require("!!raw-loader!./example/tsconfig.node.json").default,
     },
-    "/vite.config.ts": {
+    "vite.config.ts": {
       code: require("!!raw-loader!./example/vite.config.ts").default,
     },
   },
   tests: {
-    "/README.md": {
+    "README.md": {
       code: "# Vitest Demo\n\nRun `npm test` and change a test or source code to see HMR in action!\n\nLearn more at https://vitest.dev\n",
     },
-    "/package.json": {
+    "package.json": {
       code: `{
   "name": "@vitest/tests",
   "type": "module",
@@ -88,21 +88,21 @@ export const VANILLA_TEMPLATE: Template = {
   "devDependencies": {
     "vite": "latest",
     "vitest": "latest",
-    "math": "file:../math-0.0.0.tgz"
+    "math": "file:../.library/math-0.0.0.tgz"
   }
 }
 `,
     },
-    "/tests/math.test.ts": {
+    "tests/math.test.ts": {
       code: 'import { assert, expect, test } from "vitest";\nimport { add, subtract } from "math";\n\ntest("Add", () => {\n  expect(add(1, 1)).toBe(2);\n});\n\ntest("Subtract", () => {\n  expect(subtract(15, 3)).toBe(12);\n});\n',
     },
-    "/tsconfig.json": {
+    "tsconfig.json": {
       code: '{\n  "compilerOptions": {\n    "target": "es2020",\n    "module": "node16",\n    "strict": true,\n    "declaration": true,\n    "declarationMap": true,\n    "sourceMap": true,\n    "verbatimModuleSyntax": true\n  },\n  "include": ["tests"],\n  "exclude": ["node_modules"]\n}\n',
     },
-    "/output.json": {
+    "output.json": {
       code: "{}",
     },
-    "/vite.config.ts": {
+    "vite.config.ts": {
       code: `/// <reference types="vitest" />
   
   // Configure Vitest (https://vitest.dev/config/)

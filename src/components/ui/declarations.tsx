@@ -48,7 +48,7 @@ export const PackageDeclarations = ({
   return Object.entries(fileMap).map(([path, file]) => (
     <DeclarationFile
       key={path}
-      path={`file:///node_modules/${packageName}${path}`}
+      path={`file:///node_modules/${packageName}/${path}`}
       contents={file.code}
     />
   ));

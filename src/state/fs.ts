@@ -29,7 +29,7 @@ export class NodeManager {
   }
 
   get path(): string {
-    if (this.folder) {
+    if (this.folder && this.folder.id !== "root") {
       return `${this.folder.path}/${this.name}`;
     }
     return this.name;
