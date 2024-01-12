@@ -33,7 +33,7 @@ export class LibraryRunner extends Runner {
       this.updateFiles(files).then(() => {
         this.build();
       });
-    }, 1000),
+    }, 2000),
   };
 
   init = async (files: EmulatorFiles) => {
