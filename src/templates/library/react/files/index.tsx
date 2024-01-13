@@ -1,8 +1,10 @@
 import * as React from "react";
-export { add } from "./add";
-export { subtract } from "./subtract";
-export { keyBy } from "./key-by";
+import styles from "./styles.module.css";
 
-export const Button = () => {
-  return <button>hello</button>;
+interface ButtonProps extends React.ComponentProps<"button"> {}
+
+export const Button = ({ className, ...otherProps }: ButtonProps) => {
+  return (
+    <button className={[styles.button, className].join(" ")} {...otherProps} />
+  );
 };

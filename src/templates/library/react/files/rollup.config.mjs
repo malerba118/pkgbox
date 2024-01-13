@@ -1,11 +1,11 @@
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
+import postcss from "rollup-plugin-postcss";
 import fs from "fs";
 
 const rawData = fs.readFileSync("./package.json");
 const packageJson = JSON.parse(rawData);
 
-// Custom Rollup plugin to copy and modify package.json
 const copyPackageJson = () => ({
   name: "copy-package-json",
   generateBundle() {
@@ -28,21 +28,35 @@ export default [
     input: "index.tsx",
     output: [
       {
-        file: "dist/index.js",
+        dir: "dist",
+        entryFileNames: "[name].js",
         format: "cjs",
         sourcemap: true,
+        preserveModules: true,
       },
       {
-        file: "dist/index.mjs",
+        dir: "dist",
+        entryFileNames: "[name].mjs",
         format: "esm",
         sourcemap: true,
+        preserveModules: true,
       },
     ],
-    plugins: [esbuild(), copyPackageJson()],
+    plugins: [
+      esbuild({}),
+      postcss({
+        modules: true,
+        inject(cssVariableName) {
+          return `import styleInject from 'style-inject';\nstyleInject(${cssVariableName});`;
+        },
+      }),
+      copyPackageJson(),
+    ],
   },
   {
-    input: "index.tsx",
+    input: "./index.tsx",
     output: [{ file: "dist/index.d.ts", format: "es" }],
     plugins: [dts()],
+    external: [/\.css$/],
   },
 ];

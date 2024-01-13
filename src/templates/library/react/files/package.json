@@ -2,23 +2,23 @@
   "name": "math",
   "version": "0.0.0",
   "main": "index.ts",
-  "devDependencies": {
-    "esbuild": "latest",
-    "rollup": "latest",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-esbuild": "latest"
-  },
   "scripts": {
     "build": "rollup -c"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.202",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "lodash": "^4.17.21"
+    "style-inject": "^0.3.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "esbuild": "latest",
+    "rollup": "latest",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-esbuild": "latest",
+    "rollup-plugin-postcss": "latest"
   }
 }
