@@ -52,7 +52,7 @@ const files = {
 const getAppTsx = (options: TemplateOptions) => {
   if (options.library === LibraryTemplateType.React)
     return `import { useState } from "react";
-import { add, subtract, Button } from "${options.name}";
+import { Button } from "${options.name}";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -70,17 +70,12 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>Count: {count}</h1>
       <div className="card">
         <Button
-          onClick={() => setCount((currentCount) => add(currentCount, 1))}
+          onClick={() => setCount(count => count + 1)}
         >
-          count is {count}
-        </Button>
-        <Button
-          onClick={() => setCount((currentCount) => subtract(currentCount, 1))}
-        >
-          Decrement
+          Increment
         </Button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR

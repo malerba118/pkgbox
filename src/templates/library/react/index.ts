@@ -4,14 +4,8 @@ const files = {
   "index.tsx": {
     code: require("!!raw-loader!./files/index.tsx").default,
   },
-  "add.ts": {
-    code: require("!!raw-loader!./files/add.ts").default,
-  },
-  "subtract.ts": {
-    code: require("!!raw-loader!./files/subtract.ts").default,
-  },
-  "key-by.ts": {
-    code: require("!!raw-loader!./files/key-by.ts").default,
+  "styles.module.css": {
+    code: require("!!raw-loader!./files/styles.module.css").default,
   },
   "package.json": {
     code: require("!!raw-loader!./files/package.json").default,
@@ -21,6 +15,9 @@ const files = {
   },
   "rollup.config.mjs": {
     code: require("!!raw-loader!./files/rollup.config.mjs").default,
+  },
+  "globals.d.ts": {
+    code: require("!!raw-loader!./files/globals.d.ts").default,
   },
 };
 
