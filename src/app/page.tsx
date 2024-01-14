@@ -170,7 +170,7 @@ const Home = () => {
                     resolveJsonModule: true,
                     moduleResolution:
                       monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-                    // module: monaco.languages.typescript.ModuleKind.CommonJS,
+                    module: monaco.languages.typescript.ModuleKind.CommonJS,
                     typeRoots: ["node_modules/@types"],
                     allowSyntheticDefaultImports: true,
                     allowJs: true,
@@ -187,6 +187,13 @@ const Home = () => {
                   );
                   monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
                     compilerOptions
+                  );
+
+                  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
+                    {
+                      noSemanticValidation: false,
+                      noSyntaxValidation: false,
+                    }
                   );
                   editor.onDidChangeModel(() => {
                     // When switching files we need to run typescript compiler.
