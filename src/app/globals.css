@@ -75,6 +75,10 @@
   }
 }
 
+.editor * {
+  font-family: var(--fira-mono) !important;
+}
+
 .jsx-tag-name {
   color: red !important;
 }

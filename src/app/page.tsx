@@ -131,7 +131,7 @@ const Home = () => {
   return (
     <main className="">
       <div className="hstack">
-        <div className="stack h-screen gap-1 flex-1 min-w-0">
+        <div className="stack h-screen flex-1 min-w-0">
           <Tabs
             value={project.activeApp.activeFileId || ""}
             onValueChange={(val) => {
@@ -155,6 +155,7 @@ const Home = () => {
               }}
             >
               <Editor
+                className="editor"
                 height="100%"
                 key={project.activeAppId}
                 path={project.activeApp.activeFile?.path}
@@ -218,6 +219,7 @@ const Home = () => {
                   },
                   automaticLayout: true,
                   scrollBeyondLastLine: false,
+                  fontSize: 12,
                 }}
               >
                 {project.activeApp.files.map((file) => (

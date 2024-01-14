@@ -1,9 +1,39 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import {
+  Fira_Code,
+  Fira_Mono,
+  IBM_Plex_Mono,
+  Inconsolata,
+  Inter,
+  JetBrains_Mono,
+  Source_Code_Pro,
+} from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import { cn } from "../lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
+const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
+const imbPlexMono = IBM_Plex_Mono({
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+});
+const inconsolata = Inconsolata({
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+});
+const firaCode = Fira_Code({
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+});
+const firaMono = Fira_Mono({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+});
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["300", "400", "500"],
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +47,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body
+        className={cn(
+          inter.className,
+          sourceCodePro.className,
+          imbPlexMono.className,
+          inconsolata.className,
+          // firaCode.className,
+          firaMono.className
+          // jetbrainsMono.className
+        )}
+      >
+        {children}
+      </body>
       <Toaster />
     </html>
   );
