@@ -1,267 +1,116 @@
 "use client";
-import Image from "next/image";
-import { Button } from "../components/ui/button";
-import { ProjectManager } from "../state/project";
-import { nanoid } from "nanoid";
-import { removeForwardSlashes } from "../lib/utils";
-import { useEffect, useRef, useState } from "react";
+
+import { Box, DarkMode, HStack, Stack, Text, chakra } from "@chakra-ui/react";
 import { observer } from "mobx-react";
-import { useLatestRef } from "@chakra-ui/hooks";
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { ReactNode, createContext, useContext, useEffect } from "react";
+import { useQuery, useQueryClient } from "react-query";
 import { Emulator } from "../state/runners/emulator";
-import { VANILLA_TEMPLATE } from "../templates/vanilla";
-import { getTemplate } from "@/templates";
-import { ServerStatus } from "../state/runners/example";
-import { Editor } from "../components/ui/editor";
-import { ModelFile } from "../components/ui/models";
-import { PackageDeclarations } from "../components/ui/declarations";
-import { InitializationStatus } from "../state/runners/runner";
+import { ProjectManager } from "../state/project";
+import { Project } from "../state/types";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
+import { TemplateOptions, getTemplate } from "../templates";
 
-const emulatorPromise = Emulator.create();
+const ProjectContext = createContext<ProjectManager | undefined>(undefined);
+
+const ProjectProvider = ({
+  data,
+  children,
+}: {
+  data: Project | TemplateOptions;
+  children: ReactNode;
+}) => {
+  const queryClient = useQueryClient();
+  const query = useQuery(["project"], async ({ queryKey }) => {
+    const oldProject = queryClient.getQueryData<ProjectManager | undefined>(
+      queryKey
+    );
+    oldProject?.dispose();
+    const emulator = await Emulator.create();
+    const project = new ProjectManager(data, emulator);
+    return project;
+  });
+
+  useEffect(() => {}, []);
+
+  if (query.isLoading) {
+    return <Text>Loading...</Text>;
+  } else if (query.isError) {
+    return <Text>Error</Text>;
+  }
+  return (
+    <ProjectContext.Provider value={query.data}>
+      {children}
+    </ProjectContext.Provider>
+  );
+};
 
 const useProject = () => {
-  const [project, setProject] = useState<ProjectManager | null>(null);
-  const projectAlreadyExistsRef = useRef(false);
-
-  useEffect(() => {
-    emulatorPromise.then((emulator) => {
-      if (!projectAlreadyExistsRef.current) {
-        projectAlreadyExistsRef.current = true;
-        const project = new ProjectManager(
-          {
-            id: nanoid(),
-            name: "project",
-            files: [],
-            folders: [],
-          },
-          emulator
-        );
-        project.createFilesFromTemplate(
-          getTemplate({
-            name: "math",
-            library: LibraryTemplateType.React,
-            example: ExampleTemplateType.React,
-          })
-        );
-        setProject(project);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    if (project) {
-      project.init();
-    }
-  }, [project]);
-
+  const project = useContext(ProjectContext);
+  if (!project) {
+    throw Error("useProject must be used inside of ProjectProivder");
+  }
   return project;
 };
 
-const ExamplePreview = observer(({ project }: { project: ProjectManager }) => {
-  if (
-    !project.example.runner.url ||
-    project.example.runner.serverStatus === ServerStatus.Starting
-  ) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <iframe
-      src={project.example.runner.url}
-      className="absolute h-full w-full"
-    />
-  );
+const Overlay = chakra("div", {
+  baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
 });
 
-const TestsPreview = observer(({ project }: { project: ProjectManager }) => {
-  if (!project.tests.runner.results) {
-    return null;
-  }
-  return (
-    <div className="absolute w-full h-full overflow-auto">
-      <pre>{JSON.stringify(project.tests.runner.results, null, 2)}</pre>
-    </div>
-  );
-});
+const EditorTabs = () => {
+  return <Box h={12} borderBottom="subtle"></Box>;
+};
 
-const AppTabs = observer(({ project }: any) => {
-  return (
-    <Tabs
-      // className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden"
-      value={project.activeAppId}
-      onValueChange={(val) => {
-        project.setActiveAppId(val);
-        if (val === "example" || val === "tests") {
-          project.setActivePreview(val);
-        }
-      }}
-    >
-      <TabsList className="fixed left-1/2 -translate-x-1/2 bottom-4 z-[10000] shadow-xl overflow-hidden">
-        <TabsTrigger value="library">Library</TabsTrigger>
-        <TabsTrigger value="example">Example</TabsTrigger>
-        <TabsTrigger value="tests">Tests</TabsTrigger>
-      </TabsList>
-    </Tabs>
-  );
-});
+const Editor = () => {
+  const project = useProject();
+  useEffect(() => {
+    console.log(project);
+  }, []);
+  return <Box w="100%" h="100%" bg="layer-1"></Box>;
+};
 
-const PreviewTabs = observer(({ project }: any) => {
-  return (
-    <Tabs
-      value={project.activePreview}
-      onValueChange={(val) => {
-        project.setActivePreview(val);
-      }}
-    >
-      <TabsList>
-        <TabsTrigger value="example">Example</TabsTrigger>
-        <TabsTrigger value="tests">Tests</TabsTrigger>
-      </TabsList>
-    </Tabs>
-  );
-});
+const PreviewTabs = () => {
+  return <Box h={12} borderBottom="subtle"></Box>;
+};
+
+const ExamplePreview = () => {
+  return <Box w="100%" h="100%" bg="layer-0"></Box>;
+};
 
 const Home = () => {
-  const project = useProject();
-
-  if (!project) return null;
-
   return (
-    <main className="">
-      <div className="hstack">
-        <div className="stack h-screen flex-1 min-w-0">
-          <Tabs
-            value={project.activeApp.activeFileId || ""}
-            onValueChange={(val) => {
-              project.activeApp.setActiveFileId(val);
-            }}
-            className="w-full overflow-auto"
-          >
-            <TabsList>
-              {project.activeApp.files.map((file) => (
-                <TabsTrigger key={file.id} value={file.id}>
-                  {file.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <div className="relative flex-1">
-            <div
-              className="h-full"
-              style={{
-                visibility: project.activeApp.activeFile ? "visible" : "hidden",
-              }}
-            >
-              <Editor
-                className="editor"
-                height="100%"
-                key={project.activeAppId}
-                path={project.activeApp.activeFile?.path}
-                value={project.activeApp.activeFile?.contents}
-                // keepCurrentModel
-                onMount={(editor, monaco) => {
-                  monaco.languages.typescript.typescriptDefaults.setEagerModelSync(
-                    true
-                  );
-                  const compilerOptions = {
-                    target: monaco.languages.typescript.ScriptTarget.Latest,
-                    allowNonTsExtensions: true,
-                    resolveJsonModule: true,
-                    moduleResolution:
-                      monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-                    module: monaco.languages.typescript.ModuleKind.CommonJS,
-                    typeRoots: ["node_modules/@types"],
-                    allowSyntheticDefaultImports: true,
-                    allowJs: true,
-                    strict: false,
-                    noImplicitAny: false,
-                    allowImportingTsExtensions: true,
-                    noEmit: true,
-                    esModuleInterop: true,
-                    jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
-                    reactNamespace: "React",
-                  };
-                  monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
-                    compilerOptions
-                  );
-                  monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
-                    compilerOptions
-                  );
-
-                  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
-                    {
-                      noSemanticValidation: false,
-                      noSyntaxValidation: false,
-                    }
-                  );
-                  editor.onDidChangeModel(() => {
-                    // When switching files we need to run typescript compiler.
-                    // This forces it to rerun and show appropriate errors.
-                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(
-                      monaco.languages.typescript.typescriptDefaults.getDiagnosticsOptions()
-                    );
-                  });
-                  var myBinding = editor.addCommand(
-                    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-                    function () {
-                      editor.getAction("editor.action.formatDocument")?.run();
-                    }
-                  );
-                }}
-                onChange={(val) => {
-                  project.activeApp.activeFile?.setContents(val || "");
-                }}
-                options={{
-                  minimap: {
-                    enabled: false,
-                  },
-                  automaticLayout: true,
-                  scrollBeyondLastLine: false,
-                  fontSize: 12,
-                }}
-              >
-                {project.activeApp.files.map((file) => (
-                  <ModelFile
-                    key={file.id}
-                    path={file.path}
-                    contents={file.contents}
-                    isDisabled={project.activeApp.activeFileId === file.id}
-                  />
-                ))}
-                {project.example.runner.initializationStatus ===
-                  InitializationStatus.Initialized && (
-                  <>
-                    {Object.keys(project.activeApp.dependencies).map(
-                      (packageName) => (
-                        <PackageDeclarations
-                          key={packageName + project.activeAppId}
-                          appName={project.activeAppId}
-                          packageName={packageName}
-                          project={project}
-                        />
-                      )
-                    )}
-                  </>
-                )}
-              </Editor>
-            </div>
-          </div>
-        </div>
-        <div className="stack flex-1 min-w-0">
-          <PreviewTabs project={project} />
-          <div className="relative flex-1">
-            {project.activePreview === "example" ? (
-              <ExamplePreview project={project} />
-            ) : (
-              <TestsPreview project={project} />
-            )}
-          </div>
-        </div>
-      </div>
-      <AppTabs project={project} />
-    </main>
+    <DarkMode>
+      <Stack h="100dvh" bg="layer-0">
+        <Box h={16} borderBottom="subtle"></Box>
+        <HStack flex={1}>
+          <Box h="100%" w={60} borderRight="subtle"></Box>
+          <Stack h="100%" flex={1} minW={0} borderRight="subtle">
+            <EditorTabs />
+            <Box pos="relative" flex={1}>
+              <Overlay overflow="auto">
+                <ProjectProvider
+                  data={{
+                    name: "math",
+                    library: LibraryTemplateType.React,
+                    example: ExampleTemplateType.React,
+                  }}
+                >
+                  <Editor />
+                </ProjectProvider>
+              </Overlay>
+            </Box>
+          </Stack>
+          <Stack h="100%" flex={1} minW={0} borderRight="subtle">
+            <PreviewTabs />
+            <Box pos="relative" flex={1}>
+              <Overlay overflow="auto">
+                <ExamplePreview />
+              </Overlay>
+            </Box>
+          </Stack>
+        </HStack>
+      </Stack>
+    </DarkMode>
   );
 };
 

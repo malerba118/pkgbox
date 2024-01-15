@@ -76,17 +76,5 @@
 }
 
 .editor * {
-  font-family: var(--fira-mono) !important;
-}
-
-.jsx-tag-name {
-  color: red !important;
-}
-
-.jsx-expression-braces {
-  color: red !important;
-}
-
-.jsx-text {
-  color: red !important;
+  font-family: var(--font-fira-mono) !important;
 }

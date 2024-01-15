@@ -5,7 +5,6 @@ import EventEmitter from "eventemitter3";
 import { Subscriber } from "../types";
 import { debounce } from "lodash";
 import { createAsyncQueue } from "../../lib/async";
-import { toast } from "sonner";
 
 export interface BuildResult {
   packageId: string;
@@ -29,7 +28,6 @@ export class LibraryRunner extends Runner {
 
   debounced = {
     updateFilesAndBuild: debounce((files: EmulatorFiles) => {
-      toast("Building", { position: "bottom-left", duration: 2000 });
       this.updateFiles(files).then(() => {
         this.build();
       });

@@ -1,38 +1,21 @@
 import type { Metadata } from "next";
-import {
-  Fira_Code,
-  Fira_Mono,
-  IBM_Plex_Mono,
-  Inconsolata,
-  Inter,
-  JetBrains_Mono,
-  Source_Code_Pro,
-} from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
+import { Fira_Mono, Inconsolata } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { cn } from "../lib/utils";
+import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"] });
-const sourceCodePro = Source_Code_Pro({ subsets: ["latin"] });
-const imbPlexMono = IBM_Plex_Mono({
-  weight: ["300", "400", "500"],
-  subsets: ["latin"],
-});
-const inconsolata = Inconsolata({
-  weight: ["300", "400", "500"],
-  subsets: ["latin"],
-});
-const firaCode = Fira_Code({
-  weight: ["300", "400", "500"],
-  subsets: ["latin"],
-});
 const firaMono = Fira_Mono({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
+  variable: "--font-fira-mono",
 });
-const jetbrainsMono = JetBrains_Mono({
-  weight: ["300", "400", "500"],
+
+const inconsolata = Inconsolata({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
+  variable: "--font-inconsolata",
 });
 
 export const metadata: Metadata = {
@@ -46,21 +29,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          inter.className,
-          sourceCodePro.className,
-          imbPlexMono.className,
-          inconsolata.className,
-          // firaCode.className,
-          firaMono.className
-          // jetbrainsMono.className
-        )}
-      >
-        {children}
+    <html
+      lang="en"
+      className={cn(
+        firaMono.variable,
+        GeistMono.variable,
+        GeistSans.variable,
+        inconsolata.variable
+      )}
+    >
+      <body>
+        <Providers>{children}</Providers>
       </body>
-      <Toaster />
     </html>
   );
 }
