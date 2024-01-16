@@ -21,6 +21,9 @@ export class ProjectManager {
   initCount: number = 0;
 
   constructor(data: Project | TemplateOptions, emulator: Emulator) {
+    this.activeAppId = "library";
+    this.activePreview = "example";
+    this.emulator = emulator;
     if ("id" in data) {
       this.id = data.id;
       this.name = data.name;
@@ -71,9 +74,6 @@ export class ProjectManager {
       );
       this.createFilesFromTemplate(getTemplate(data));
     }
-    this.activeAppId = "library";
-    this.activePreview = "example";
-    this.emulator = emulator;
     makeObservable(this, {
       activeAppId: observable.ref,
       setActiveAppId: action,

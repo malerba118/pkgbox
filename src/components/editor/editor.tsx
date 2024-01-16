@@ -34,7 +34,26 @@ export const useEditor = () => {
   return context;
 };
 
-export const Editor = ({ onMount, children, ...otherProps }: EditorProps) => {
+const DEFAULT_OPTIONS: EditorTypes.IStandaloneEditorConstructionOptions = {
+  minimap: {
+    enabled: false,
+  },
+  automaticLayout: true,
+  scrollBeyondLastLine: false,
+  fontSize: 13,
+  letterSpacing: -0.2,
+  padding: { top: 12 },
+  lineNumbersMinChars: 4,
+  glyphMargin: false,
+  lineDecorationsWidth: 3,
+};
+
+export const Editor = ({
+  onMount,
+  options,
+  children,
+  ...otherProps
+}: EditorProps) => {
   const [context, setContext] = useState<EditorContextData | null>(null);
   const highlighterDisposerRef = useRef<() => void>();
 
@@ -56,6 +75,10 @@ export const Editor = ({ onMount, children, ...otherProps }: EditorProps) => {
           onMount?.(editor, monaco);
         }}
         theme="tomorrow-night"
+        options={{
+          ...DEFAULT_OPTIONS,
+          ...options,
+        }}
       />
     </EditorContext.Provider>
   );

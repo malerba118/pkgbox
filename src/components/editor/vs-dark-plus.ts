@@ -1,3 +1,4 @@
+// THIS IS A VS CODE THEME, NOT A MONACO THEME AND SO IT NEEDS TO BE REMAPPED TO THE PROPER STRUCTURE
 export const vsDarkPlus = {
   $schema: "vscode://schemas/color-theme",
   name: "Dark+ (default dark)",

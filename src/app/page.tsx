@@ -9,49 +9,9 @@ import { ProjectManager } from "../state/project";
 import { Project } from "../state/types";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
-import { TemplateOptions, getTemplate } from "../templates";
-
-const ProjectContext = createContext<ProjectManager | undefined>(undefined);
-
-const ProjectProvider = ({
-  data,
-  children,
-}: {
-  data: Project | TemplateOptions;
-  children: ReactNode;
-}) => {
-  const queryClient = useQueryClient();
-  const query = useQuery(["project"], async ({ queryKey }) => {
-    const oldProject = queryClient.getQueryData<ProjectManager | undefined>(
-      queryKey
-    );
-    oldProject?.dispose();
-    const emulator = await Emulator.create();
-    const project = new ProjectManager(data, emulator);
-    return project;
-  });
-
-  useEffect(() => {}, []);
-
-  if (query.isLoading) {
-    return <Text>Loading...</Text>;
-  } else if (query.isError) {
-    return <Text>Error</Text>;
-  }
-  return (
-    <ProjectContext.Provider value={query.data}>
-      {children}
-    </ProjectContext.Provider>
-  );
-};
-
-const useProject = () => {
-  const project = useContext(ProjectContext);
-  if (!project) {
-    throw Error("useProject must be used inside of ProjectProivder");
-  }
-  return project;
-};
+import { TemplateOptions } from "../templates";
+import { ProjectProvider, useProject } from "../components/Project";
+import ProjectEditor from "../components/ProjectEditor";
 
 const Overlay = chakra("div", {
   baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
@@ -61,13 +21,13 @@ const EditorTabs = () => {
   return <Box h={12} borderBottom="subtle"></Box>;
 };
 
-const Editor = () => {
-  const project = useProject();
-  useEffect(() => {
-    console.log(project);
-  }, []);
-  return <Box w="100%" h="100%" bg="layer-1"></Box>;
-};
+// const Editor = () => {
+//   const project = useProject();
+//   useEffect(() => {
+//     console.log(project);
+//   }, []);
+//   return <Box w="100%" h="100%" bg="layer-1"></Box>;
+// };
 
 const PreviewTabs = () => {
   return <Box h={12} borderBottom="subtle"></Box>;
@@ -95,7 +55,7 @@ const Home = () => {
                     example: ExampleTemplateType.React,
                   }}
                 >
-                  <Editor />
+                  <ProjectEditor />
                 </ProjectProvider>
               </Overlay>
             </Box>
