@@ -1,6 +1,14 @@
 "use client";
 
-import { Box, DarkMode, HStack, Stack, Text, chakra } from "@chakra-ui/react";
+import {
+  Box,
+  DarkMode,
+  HStack,
+  Stack,
+  Text,
+  chakra,
+  useColorMode,
+} from "@chakra-ui/react";
 import { observer } from "mobx-react";
 import { ReactNode, createContext, useContext, useEffect } from "react";
 import { useQuery, useQueryClient } from "react-query";
@@ -10,16 +18,19 @@ import { Project } from "../state/types";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
 import { TemplateOptions } from "../templates";
-import { ProjectProvider, useProject } from "../components/Project";
+import { ProjectProvider, useProject } from "../components/ProjectProvider";
 import ProjectEditor from "../components/ProjectEditor";
+import ExamplePreview from "../components/ExamplePreview";
+import EditorTabs from "../components/editor/EditorTabs";
+import { DarkModeSwitch } from "react-toggle-dark-mode";
 
 const Overlay = chakra("div", {
   baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
 });
 
-const EditorTabs = () => {
-  return <Box h={12} borderBottom="subtle"></Box>;
-};
+// const EditorTabs = () => {
+//   return <Box h={12} borderBottom="subtle"></Box>;
+// };
 
 // const Editor = () => {
 //   const project = useProject();
@@ -33,30 +44,38 @@ const PreviewTabs = () => {
   return <Box h={12} borderBottom="subtle"></Box>;
 };
 
-const ExamplePreview = () => {
-  return <Box w="100%" h="100%" bg="layer-0"></Box>;
-};
+// const ExamplePreview = () => {
+//   return <Box w="100%" h="100%" bg="layer-0"></Box>;
+// };
 
 const Home = () => {
+  const colorMode = useColorMode();
   return (
-    <DarkMode>
+    <ProjectProvider
+      data={{
+        name: "math",
+        library: LibraryTemplateType.React,
+        example: ExampleTemplateType.React,
+      }}
+    >
       <Stack h="100dvh" bg="layer-0">
-        <Box h={16} borderBottom="subtle"></Box>
+        <HStack h={16} borderBottom="subtle" alignItems="center" px={6}>
+          <Box flex={1} />
+          <DarkModeSwitch
+            checked={colorMode.colorMode === "light"}
+            onChange={colorMode.toggleColorMode}
+            size={24}
+            moonColor="var(--chakra-colors-gray-400)"
+            sunColor="var(--chakra-colors-gray-600)"
+          />
+        </HStack>
         <HStack flex={1}>
           <Box h="100%" w={60} borderRight="subtle"></Box>
           <Stack h="100%" flex={1} minW={0} borderRight="subtle">
             <EditorTabs />
             <Box pos="relative" flex={1}>
               <Overlay overflow="auto">
-                <ProjectProvider
-                  data={{
-                    name: "math",
-                    library: LibraryTemplateType.React,
-                    example: ExampleTemplateType.React,
-                  }}
-                >
-                  <ProjectEditor />
-                </ProjectProvider>
+                <ProjectEditor />
               </Overlay>
             </Box>
           </Stack>
@@ -70,7 +89,7 @@ const Home = () => {
           </Stack>
         </HStack>
       </Stack>
-    </DarkMode>
+    </ProjectProvider>
   );
 };
 

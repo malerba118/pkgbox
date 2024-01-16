@@ -38,7 +38,7 @@ export async function initializeMonaco(monaco: Monaco) {
       token: "punctuation.definition.string",
     }
   );
-  theme.colors["editor.background"] = "#131313";
+  theme.colors["editor.background"] = "#171717";
   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
   const compilerOptions = {
     target: monaco.languages.typescript.ScriptTarget.Latest,
