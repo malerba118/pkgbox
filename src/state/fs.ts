@@ -75,7 +75,7 @@ export class FolderManager extends NodeManager {
   expanded: boolean;
   constructor(data: AppFolder, app: AppManager) {
     super(data, app);
-    this.expanded = false;
+    this.expanded = data.expanded ?? false;
     makeObservable(this, {
       expanded: observable.ref,
       setExpanded: action,

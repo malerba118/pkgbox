@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Fira_Mono, Inconsolata } from "next/font/google";
+import {
+  Fira_Mono,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+  Inconsolata,
+  Inter,
+  Manrope,
+} from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
@@ -16,6 +23,30 @@ const inconsolata = Inconsolata({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-inconsolata",
+});
+
+const manrope = Manrope({
+  weight: ["500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
+
+const inter = Inter({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-ibm-plex-sans",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-ibm-plex-mono",
 });
 
 export const metadata: Metadata = {
@@ -35,7 +66,11 @@ export default function RootLayout({
         firaMono.variable,
         GeistMono.variable,
         GeistSans.variable,
-        inconsolata.variable
+        inconsolata.variable,
+        manrope.variable,
+        inter.variable,
+        ibmPlexSans.variable,
+        ibmPlexMono.variable
       )}
     >
       <body>

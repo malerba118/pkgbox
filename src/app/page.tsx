@@ -66,9 +66,7 @@ const Home = () => {
           <Stack h="100%" flex={1} minW={0} borderRight="subtle">
             <EditorTabs />
             <Box pos="relative" flex={1}>
-              <Overlay overflow="auto">
-                <ProjectEditor />
-              </Overlay>
+              <ProjectEditor />
             </Box>
           </Stack>
           <Stack h="100%" flex={1} minW={0} borderRight="subtle">

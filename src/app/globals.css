@@ -1,3 +1,7 @@
 .editor * {
   font-family: var(--font-fira-mono) !important;
 }
+
+html {
+  font-size: 92%;
+}

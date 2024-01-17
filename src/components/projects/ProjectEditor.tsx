@@ -21,7 +21,7 @@ const ProjectEditor = observer(() => {
     >
       <Editor
         className="editor"
-        //   loading={<Box pos="absolute" inset={0} bg="layer-1" />}
+        loading={<Box />}
         height="100%"
         key={project.activeAppId}
         path={project.activeApp.activeFile?.path}

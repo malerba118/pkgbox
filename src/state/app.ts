@@ -37,6 +37,7 @@ export abstract class AppManager {
         // @ts-ignore
         name: this.app_id,
         folder_id: null,
+        expanded: true,
       },
       this
     );
@@ -92,12 +93,14 @@ export abstract class AppManager {
     //   : this.files[0];
     const rootFiles = this.files.filter((file) => file.folder_id === "root");
     return (
-      rootFiles.find(
-        (file) =>
-          file.name.includes("index") ||
-          file.name.includes("app") ||
-          file.name.includes("main")
-      ) ||
+      rootFiles.find((file) => {
+        const fileName = file.name.toLowerCase();
+        return (
+          fileName.includes("app") ||
+          fileName.includes("main") ||
+          fileName.includes("index")
+        );
+      }) ||
       rootFiles[0] ||
       null
     );

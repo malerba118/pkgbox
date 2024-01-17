@@ -23,6 +23,7 @@ const AppTabs = observer(() => {
         background: `rgba(30, 30, 30, 0.5)`,
       }}
       backdropFilter="blur(16px)"
+      zIndex={100}
     >
       <Tabs
         index={APP_TABS.indexOf(project.activeAppId)}

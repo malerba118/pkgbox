@@ -8,7 +8,7 @@ import { CloseButton } from "./components/CloseButton";
 export const theme = extendTheme({
   fonts: {
     heading: "var(--font-geist-mono)",
-    body: "var(--font-inconsolata)",
+    body: "var(--font-geist-mono)",
   },
   colors: {
     gray: {

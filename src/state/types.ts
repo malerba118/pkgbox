@@ -13,7 +13,9 @@ export interface AppFile extends AppNode {
   contents: string;
 }
 
-export interface AppFolder extends AppNode {}
+export interface AppFolder extends AppNode {
+  expanded?: boolean;
+}
 
 export interface Project {
   id: string;

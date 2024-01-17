@@ -149,10 +149,10 @@ export class ProjectManager {
   createFilesFromTemplate(template: Template) {
     this.library.createFilesFromFileMap(template.library);
     if (this.library.entrypoint) this.library.openFile(this.library.entrypoint);
-    this.library.files.forEach((f) => this.library.openFile(f));
+    // this.library.files.forEach((f) => this.library.openFile(f));
     this.example.createFilesFromFileMap(template.example);
     if (this.example.entrypoint) this.example.openFile(this.example.entrypoint);
-    this.example.files.forEach((f) => this.example.openFile(f));
+    // this.example.files.forEach((f) => this.example.openFile(f));
     this.tests.createFilesFromFileMap(template.tests);
     if (this.tests.entrypoint) this.tests.openFile(this.tests.entrypoint);
   }
