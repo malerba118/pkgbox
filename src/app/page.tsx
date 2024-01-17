@@ -18,35 +18,25 @@ import { Project } from "../state/types";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
 import { TemplateOptions } from "../templates";
-import { ProjectProvider, useProject } from "../components/ProjectProvider";
-import ProjectEditor from "../components/ProjectEditor";
-import ExamplePreview from "../components/ExamplePreview";
-import EditorTabs from "../components/editor/EditorTabs";
+import {
+  ProjectProvider,
+  useProject,
+} from "../components/projects/ProjectProvider";
+import ProjectEditor from "../components/projects/ProjectEditor";
+import ExamplePreview from "../components/projects/ExamplePreview";
+import EditorTabs from "../components/projects/EditorTabs";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
+import AppTabs from "../components/projects/AppTabs";
+import Folder from "../components/projects/Folder";
+import Sidebar from "../components/projects/Sidebar";
 
 const Overlay = chakra("div", {
   baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
 });
 
-// const EditorTabs = () => {
-//   return <Box h={12} borderBottom="subtle"></Box>;
-// };
-
-// const Editor = () => {
-//   const project = useProject();
-//   useEffect(() => {
-//     console.log(project);
-//   }, []);
-//   return <Box w="100%" h="100%" bg="layer-1"></Box>;
-// };
-
 const PreviewTabs = () => {
-  return <Box h={12} borderBottom="subtle"></Box>;
+  return <Box h={10} borderBottom="subtle"></Box>;
 };
-
-// const ExamplePreview = () => {
-//   return <Box w="100%" h="100%" bg="layer-0"></Box>;
-// };
 
 const Home = () => {
   const colorMode = useColorMode();
@@ -70,7 +60,9 @@ const Home = () => {
           />
         </HStack>
         <HStack flex={1}>
-          <Box h="100%" w={60} borderRight="subtle"></Box>
+          <Box h="100%" w={56} borderRight="subtle">
+            <Sidebar />
+          </Box>
           <Stack h="100%" flex={1} minW={0} borderRight="subtle">
             <EditorTabs />
             <Box pos="relative" flex={1}>
@@ -89,6 +81,7 @@ const Home = () => {
           </Stack>
         </HStack>
       </Stack>
+      <AppTabs />
     </ProjectProvider>
   );
 };

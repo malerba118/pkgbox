@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
-import { ProjectManager } from "../state/project";
-import { ServerStatus } from "../state/runners/example";
+import { ProjectManager } from "../../state/project";
+import { ServerStatus } from "../../state/runners/example";
 import { chakra } from "@chakra-ui/react";
 import { useProject } from "./ProjectProvider";
 

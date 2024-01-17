@@ -4,12 +4,12 @@ import { Box, DarkMode, HStack, Stack, Text, chakra } from "@chakra-ui/react";
 import { observer } from "mobx-react";
 import { ReactNode, createContext, useContext, useEffect } from "react";
 import { useQuery, useQueryClient } from "react-query";
-import { Emulator } from "../state/runners/emulator";
-import { ProjectManager } from "../state/project";
-import { Project } from "../state/types";
-import { LibraryTemplateType } from "../templates/library";
-import { ExampleTemplateType } from "../templates/example";
-import { TemplateOptions } from "../templates";
+import { Emulator } from "../../state/runners/emulator";
+import { ProjectManager } from "../../state/project";
+import { Project } from "../../state/types";
+import { LibraryTemplateType } from "../../templates/library";
+import { ExampleTemplateType } from "../../templates/example";
+import { TemplateOptions } from "../../templates";
 
 const ProjectContext = createContext<ProjectManager | undefined>(undefined);
 

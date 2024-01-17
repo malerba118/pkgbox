@@ -4,10 +4,10 @@ import { Box } from "@chakra-ui/react";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
 import { useProject } from "./ProjectProvider";
-import { Editor } from "./editor/editor";
-import { ModelFile } from "./editor/models";
-import { InitializationStatus } from "../state/runners/runner";
-import { PackageDeclarations } from "./editor/declarations";
+import { Editor } from "../editor/editor";
+import { ModelFile } from "../editor/models";
+import { InitializationStatus } from "../../state/runners/runner";
+import { PackageDeclarations } from "../editor/declarations";
 
 const ProjectEditor = observer(() => {
   const project = useProject();

@@ -1,6 +1,6 @@
 import { chakra, CloseButton, Tab, TabList, Tabs } from "@chakra-ui/react";
 import React from "react";
-import { useProject } from "../ProjectProvider";
+import { useProject } from "./ProjectProvider";
 import { observer } from "mobx-react";
 
 const EditorTabs = observer(() => {
@@ -18,7 +18,7 @@ const EditorTabs = observer(() => {
       overflow="auto"
       size="sm"
       borderBottom="subtle"
-      h={12}
+      h={10}
     >
       <TabList h="100%">
         {project.activeApp.tabs.map((file) => (
@@ -36,6 +36,10 @@ const EditorTabs = observer(() => {
                 e.stopPropagation();
                 e.preventDefault();
                 project.activeApp.closeFile(file);
+              }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
               }}
             />
           </Tab>

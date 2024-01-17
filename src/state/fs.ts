@@ -34,6 +34,16 @@ export class NodeManager {
     }
     return this.name;
   }
+
+  get pathLength(): number {
+    let length = 1;
+    let folder = this.folder;
+    while (folder) {
+      length += 1;
+      folder = folder.folder;
+    }
+    return length;
+  }
 }
 
 export class FileManager extends NodeManager {
@@ -51,11 +61,29 @@ export class FileManager extends NodeManager {
   setContents(contents: string) {
     this.contents = contents;
   }
+
+  open() {
+    this.app.openFile(this);
+  }
+
+  close() {
+    this.app.closeFile(this);
+  }
 }
 
 export class FolderManager extends NodeManager {
+  expanded: boolean;
   constructor(data: AppFolder, app: AppManager) {
     super(data, app);
+    this.expanded = false;
+    makeObservable(this, {
+      expanded: observable.ref,
+      setExpanded: action,
+    });
+  }
+
+  setExpanded(expanded: boolean) {
+    this.expanded = expanded;
   }
 
   createFolder(data: { name: string; hidden?: boolean; read_only?: boolean }) {

@@ -34,7 +34,8 @@ export abstract class AppManager {
         // @ts-ignore
         app_id: this.app_id,
         project_id: this.project.id,
-        name: "",
+        // @ts-ignore
+        name: this.app_id,
         folder_id: null,
       },
       this
