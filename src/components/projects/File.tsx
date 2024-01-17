@@ -13,7 +13,7 @@ const File = ({ file }: { file: FileManager }) => {
       textAlign="start"
       rounded="none"
       //   px={3}
-      pl={file.pathLength * 10 + "px"}
+      pl={file.pathLength * 8 + "px"}
       h="1.4rem"
       color="text-normal"
       _hover={{

@@ -8,7 +8,7 @@ const Folder = observer(({ folder }: { folder: FolderManager }) => {
   return (
     <Stack>
       <Button
-        pl={folder.pathLength * 10 + "px"}
+        pl={folder.pathLength * 8 + "px"}
         fontSize="sm"
         variant="unstyled"
         onClick={() => {
