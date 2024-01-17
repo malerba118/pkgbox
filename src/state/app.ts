@@ -16,6 +16,7 @@ export abstract class AppManager {
   foldersById: Record<string, FolderManager> = {};
   project: ProjectManager;
   activeFileId: string | null = null;
+  tabIds: string[] = [];
 
   abstract get app_id(): "library" | "tests" | "example";
 
@@ -41,6 +42,7 @@ export abstract class AppManager {
     makeObservable(this, {
       filesById: observable.shallow,
       foldersById: observable.shallow,
+      tabIds: observable.shallow,
       files: computed,
       folders: computed,
       nodes: computed,
@@ -48,11 +50,38 @@ export abstract class AppManager {
       setActiveFileId: action,
       createFileFromPath: action,
       createFilesFromFileMap: action,
+      openFile: action,
+      closeFile: action,
     });
   }
 
+  openFile(file: FileManager) {
+    if (!this.tabIds.includes(file.id)) {
+      this.tabIds = [file.id, ...this.tabIds];
+    }
+    this.setActiveFileId(file.id);
+  }
+
+  closeFile(file: FileManager) {
+    const fileIndex = this.tabIds.findIndex((fileId) => fileId === file.id);
+    this.tabIds = this.tabIds.filter((fileId) => fileId !== file.id);
+    if (this.activeFileId === file.id) {
+      this.setActiveFileId(
+        this.tabIds[fileIndex] || this.tabIds[fileIndex - 1] || null
+      );
+    }
+  }
+
+  get tabs() {
+    return this.tabIds.map((fileId) => this.filesById[fileId]);
+  }
+
+  setActiveFileId(fileId: string | null) {
+    this.activeFileId = fileId;
+  }
+
   get activeFile() {
-    return this.activeFileId ? this.filesById[this.activeFileId] : null;
+    return this.activeFileId ? this.filesById[this.activeFileId] || null : null;
   }
 
   get entrypoint(): FileManager | null {
@@ -71,10 +100,6 @@ export abstract class AppManager {
       rootFiles[0] ||
       null
     );
-  }
-
-  setActiveFileId(fileId: string | null) {
-    this.activeFileId = fileId;
   }
 
   createFile({

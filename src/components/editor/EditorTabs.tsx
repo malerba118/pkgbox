@@ -8,11 +8,11 @@ const EditorTabs = observer(() => {
 
   return (
     <Tabs
-      index={project.activeApp.files.findIndex(
+      index={project.activeApp.tabs.findIndex(
         (file) => file.id === project.activeApp.activeFileId || ""
       )}
       onChange={(index) => {
-        project.activeApp.setActiveFileId(project.activeApp.files[index].id);
+        project.activeApp.openFile(project.activeApp.tabs[index]);
       }}
       w="100%"
       overflow="auto"
@@ -21,7 +21,7 @@ const EditorTabs = observer(() => {
       h={12}
     >
       <TabList h="100%">
-        {project.activeApp.files.map((file) => (
+        {project.activeApp.tabs.map((file) => (
           <Tab
             key={file.id}
             value={file.id}
@@ -30,7 +30,14 @@ const EditorTabs = observer(() => {
             alignItems="center"
           >
             <chakra.span mb="1px">{file.name}</chakra.span>
-            <CloseButton size="sm" />
+            <CloseButton
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                project.activeApp.closeFile(file);
+              }}
+            />
           </Tab>
         ))}
       </TabList>
