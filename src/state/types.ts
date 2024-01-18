@@ -34,3 +34,10 @@ export type Template = {
 
 export type Subscriber<T> = (event: T) => void;
 export type Unsubscribe = () => void;
+
+export enum AsyncStatus {
+  Idle = "idle",
+  Pending = "pending",
+  Success = "success",
+  Error = "error",
+}

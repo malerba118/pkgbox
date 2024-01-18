@@ -45,6 +45,9 @@ const ProjectEditor = observer(() => {
         onChange={(val) => {
           project.activeApp.activeFile?.setContents(val || "");
         }}
+        options={{
+          readOnly: project.activeApp.activeFile?.read_only,
+        }}
       >
         {project.activeApp.files.map((file) => (
           <ModelFile

@@ -242,6 +242,9 @@ const Home = () => {
                   scrollBeyondLastLine: false,
                   fontSize: 13,
                   letterSpacing: -0.2,
+                  scrollbar: {
+                    useShadows: false,
+                  },
                 }}
               >
                 {project.activeApp.files.map((file) => (

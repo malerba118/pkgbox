@@ -13,18 +13,34 @@ export class LibraryManager extends AppManager {
     super(data, project);
     this.runner = new LibraryRunner(this.project.emulator);
     reaction(
-      () => this.toFileMap(),
+      () => this.toFileMap({ exclude: ["dist"] }),
       () => {
         if (
           this.runner.initializationStatus === InitializationStatus.Initialized
         ) {
-          this.runner.debounced.updateFilesAndBuild(this.toFileMap());
+          this.runner.debounced.updateFilesAndBuild(
+            this.toFileMap({ exclude: ["dist"] })
+          );
         }
       },
       {
         fireImmediately: false,
       }
     );
+    this.runner.onBuild((result) => {
+      if (result.files) {
+        Object.keys(result.files).forEach((filePath) => {
+          this.createFileFromPath({
+            path: `dist/${filePath}`,
+            contents: result.files![filePath].code,
+            read_only: true,
+          });
+        });
+      }
+
+      console.log(result);
+      // this.createFilesFromFileMap(result.)
+    });
   }
 
   async init() {

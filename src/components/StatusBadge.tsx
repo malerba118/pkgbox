@@ -1,9 +1,10 @@
 import { Box, HStack, Spinner, StackProps, Text } from "@chakra-ui/react";
 import React from "react";
+import { AsyncStatus } from "../state/types";
 
 interface StatusBadgeProps extends StackProps {
   label: string;
-  status: "error" | "success" | "pending";
+  status: AsyncStatus;
 }
 
 const StatusBadge = ({ label, status, ...otherProps }: StatusBadgeProps) => {
@@ -17,12 +18,21 @@ const StatusBadge = ({ label, status, ...otherProps }: StatusBadgeProps) => {
       rounded="full"
       {...otherProps}
     >
-      {status === "pending" && <Spinner h={2} w={2} color="text-strong" />}
-      {status === "success" && (
+      {status === AsyncStatus.Idle && (
+        <Box bg="layer-2" w={2} h={2} rounded="full" />
+      )}
+      {status === AsyncStatus.Pending && (
+        <Spinner h={2} w={2} color="text-strong" />
+      )}
+      {status === AsyncStatus.Success && (
         <Box bg="green.300" w={2} h={2} rounded="full" />
       )}
-      {status === "error" && <Box bg="red.300" w={2} h={2} rounded="full" />}
-      <Text fontSize="xs">{label}</Text>
+      {status === AsyncStatus.Error && (
+        <Box bg="red.300" w={2} h={2} rounded="full" />
+      )}
+      <Text fontSize="xs" color="text-strong">
+        {label}
+      </Text>
     </HStack>
   );
 };

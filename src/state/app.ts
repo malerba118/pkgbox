@@ -174,9 +174,13 @@ export abstract class AppManager {
   createFileFromPath({
     path,
     contents = "",
+    hidden,
+    read_only,
   }: {
     path: string;
     contents?: string;
+    hidden?: boolean;
+    read_only?: boolean;
   }) {
     const parts = path.split("/").filter((part) => part.length > 0); // Split path and filter out empty parts
     let currentFolder = this.root;
@@ -188,7 +192,7 @@ export abstract class AppManager {
       // Check if folder exists, if not, create it
       let folder = currentFolder.children.find((f) => f.name === part);
       if (!folder) {
-        folder = currentFolder.createFolder({ name: part });
+        folder = currentFolder.createFolder({ name: part, read_only, hidden });
       } else if (folder instanceof FileManager) {
         throw new Error(
           "Cannot create folder because file already exists with this name"
@@ -199,17 +203,37 @@ export abstract class AppManager {
       currentFolder = folder;
     }
 
-    // Create file in the final directory
-    const fileName = parts.at(-1)!; // Get the file name, which is the last part of the path
-    currentFolder.createFile({
-      name: fileName,
-      contents,
-    });
+    // Get the file name, which is the last part of the path
+    const fileName = parts.at(-1)!;
+
+    // Check if a file with the same name already exists
+    const existingFile = currentFolder.children.find(
+      (f) => f.name === fileName && f instanceof FileManager
+    ) as FileManager;
+
+    if (existingFile) {
+      // If file exists, update its contents
+      existingFile.setContents(contents);
+    } else {
+      // If file does not exist, create it
+      currentFolder.createFile({
+        name: fileName,
+        contents,
+        read_only,
+        hidden,
+      });
+    }
   }
 
-  toFileMap() {
+  toFileMap({ exclude = [] }: { exclude?: string[] } = {}) {
     const fileMap: FileMap = {};
     this.files.forEach((file) => {
+      if (
+        exclude.length &&
+        exclude.some((excludePath) => file.path.startsWith(excludePath))
+      ) {
+        return;
+      }
       fileMap[file.path] = {
         code: file.contents,
       };

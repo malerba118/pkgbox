@@ -3,5 +3,9 @@
 }
 
 html {
-  font-size: 92%;
+  font-size: 95%;
+}
+
+.editor .decorationsOverviewRuler {
+  opacity: 0;
 }

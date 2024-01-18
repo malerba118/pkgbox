@@ -2,13 +2,14 @@ import { action, makeObservable, observable } from "mobx";
 import { Emulator, EmulatorFiles } from "./emulator";
 import { InitializationStatus, Runner } from "./runner";
 import EventEmitter from "eventemitter3";
-import { Subscriber } from "../types";
+import { AsyncStatus, FileMap, Subscriber } from "../types";
 import { debounce } from "lodash";
 import { createAsyncQueue } from "../../lib/async";
 
 export interface BuildResult {
   packageId: string;
   buildCount: number;
+  files?: FileMap;
 }
 
 enum ServerStatus {
@@ -21,9 +22,14 @@ enum ServerStatus {
 export class LibraryRunner extends Runner {
   events = new EventEmitter();
   buildCount = 0;
+  buildStatus = AsyncStatus.Idle;
 
   constructor(emulator: Emulator) {
     super(emulator);
+    makeObservable(this, {
+      buildStatus: observable.ref,
+      setBuildStatus: action,
+    });
   }
 
   debounced = {
@@ -48,8 +54,14 @@ export class LibraryRunner extends Runner {
     return this.emulator.post("/library/files", files);
   });
 
+  setBuildStatus(status: AsyncStatus) {
+    this.buildStatus = status;
+  }
+
   build = this.AsyncQueue.Fn(async (): Promise<BuildResult> => {
+    this.setBuildStatus(AsyncStatus.Pending);
     const result = await this.emulator.post("/library/build");
+    this.setBuildStatus(AsyncStatus.Success);
     this.buildCount++;
     this.events.emit("build", { ...result, buildCount: this.buildCount });
     return result;
