@@ -1,9 +1,18 @@
-import { chakra, CloseButton, Tab, TabList, Tabs } from "@chakra-ui/react";
+import {
+  chakra,
+  CloseButton,
+  Tab,
+  TabList,
+  Tabs,
+  TabsProps,
+} from "@chakra-ui/react";
 import React from "react";
 import { useProject } from "./ProjectProvider";
 import { observer } from "mobx-react";
 
-const EditorTabs = observer(() => {
+interface EditorTabsProps extends Omit<TabsProps, "children"> {}
+
+const EditorTabs = observer((props: EditorTabsProps) => {
   const project = useProject();
 
   return (
@@ -14,11 +23,10 @@ const EditorTabs = observer(() => {
       onChange={(index) => {
         project.activeApp.openFile(project.activeApp.tabs[index]);
       }}
-      w="100%"
       overflow="auto"
       size="sm"
-      borderBottom="subtle"
       h={10}
+      {...props}
     >
       <TabList h="100%">
         {project.activeApp.tabs.map((file) => (

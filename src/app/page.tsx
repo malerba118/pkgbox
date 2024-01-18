@@ -3,6 +3,7 @@
 import {
   Box,
   DarkMode,
+  Flex,
   HStack,
   Stack,
   Text,
@@ -29,6 +30,7 @@ import { DarkModeSwitch } from "react-toggle-dark-mode";
 import AppTabs from "../components/projects/AppTabs";
 import Folder from "../components/projects/Folder";
 import Sidebar from "../components/projects/Sidebar";
+import StatusBadge from "../components/StatusBadge";
 
 const Overlay = chakra("div", {
   baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
@@ -64,7 +66,10 @@ const Home = () => {
             <Sidebar />
           </Box>
           <Stack h="100%" flex={1} minW={0} borderRight="subtle">
-            <EditorTabs />
+            <HStack borderBottom="subtle">
+              <EditorTabs flex={1} />
+              <StatusBadge mx="2" label="Build" status="error" />
+            </HStack>
             <Box pos="relative" flex={1}>
               <ProjectEditor />
             </Box>
