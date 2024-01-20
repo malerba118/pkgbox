@@ -42,7 +42,6 @@ export const NodeModules = ({ appName }: NodeModulesProps) => {
     const fileMap: FileMap = await project.emulator.get(
       `/${appName}/declarations`
     );
-    console.log(fileMap);
     return fileMap;
   });
 

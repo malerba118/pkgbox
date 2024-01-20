@@ -46,21 +46,21 @@ themes.light.colors["editor.background"] = "#FAFAFA";
 export async function initializeMonaco(monaco: Monaco) {
   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
   const compilerOptions = {
-    target: monaco.languages.typescript.ScriptTarget.Latest,
-    allowNonTsExtensions: true,
-    resolveJsonModule: true,
-    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-    module: monaco.languages.typescript.ModuleKind.CommonJS,
-    typeRoots: ["node_modules/@types"],
-    allowSyntheticDefaultImports: true,
-    allowJs: true,
-    strict: true,
-    noImplicitAny: false,
-    allowImportingTsExtensions: true,
-    noEmit: true,
-    esModuleInterop: true,
-    jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
-    reactNamespace: "React",
+    // target: monaco.languages.typescript.ScriptTarget.Latest,
+    // allowNonTsExtensions: true,
+    // resolveJsonModule: true,
+    // moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    // module: monaco.languages.typescript.ModuleKind.CommonJS,
+    // typeRoots: ["node_modules/@types"],
+    // allowSyntheticDefaultImports: true,
+    // allowJs: true,
+    // strict: true,
+    // noImplicitAny: false,
+    // allowImportingTsExtensions: true,
+    // noEmit: true,
+    // esModuleInterop: true,
+    // jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+    // reactNamespace: "React",
   };
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
     compilerOptions

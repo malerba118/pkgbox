@@ -8,6 +8,7 @@ import { Editor } from "../editor/editor";
 import { ModelFile } from "../editor/models";
 import { InitializationStatus } from "../../state/runners/runner";
 import { NodeModules } from "./NodeModules";
+import SyncCompilerOptions from "./SyncCompilerOptions";
 
 const ProjectEditor = observer(() => {
   const project = useProject();
@@ -69,6 +70,7 @@ const ProjectEditor = observer(() => {
           },
         }}
       >
+        <SyncCompilerOptions />
         {project.activeApp.files.map((file) => (
           <ModelFile
             key={file.id}
