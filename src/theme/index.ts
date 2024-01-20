@@ -4,6 +4,8 @@ import { Tabs } from "./components/Tabs";
 import { Stack } from "./components/Stack";
 import { HStack } from "./components/HStack";
 import { CloseButton } from "./components/CloseButton";
+import { Button } from "./components/Button";
+import { Box } from "./components/Box";
 
 export const theme = extendTheme({
   fonts: {
@@ -11,19 +13,46 @@ export const theme = extendTheme({
     body: "var(--font-geist-mono)",
   },
   colors: {
+    // gray: {
+    //   50: "#fafafa",
+    //   100: "#f5f5f5",
+    //   200: "#e5e5e5",
+    //   300: "#d4d4d4",
+    //   400: "#a3a3a3",
+    //   500: "#737373",
+    //   600: "#525252",
+    //   700: "#404040",
+    //   800: "#262626",
+    //   900: "#171717",
+    //   925: "color-mix(in hsl, var(--chakra-colors-gray-900), var(--chakra-colors-gray-950) 50%)",
+    //   950: "#0a0a0a",
+    // },
     gray: {
       50: "#fafafa",
-      100: "#f5f5f5",
-      200: "#e5e5e5",
-      300: "#d4d4d4",
-      400: "#a3a3a3",
-      500: "#737373",
-      600: "#525252",
-      700: "#404040",
-      800: "#262626",
-      900: "#171717",
+      100: "#f4f4f5",
+      200: "#e4e4e7",
+      300: "#d4d4d8",
+      400: "#a1a1aa",
+      500: "#71717a",
+      600: "#52525b",
+      700: "#3f3f46",
+      800: "#27272a",
+      900: "#18181b",
       925: "color-mix(in hsl, var(--chakra-colors-gray-900), var(--chakra-colors-gray-950) 50%)",
-      950: "#0a0a0a",
+      950: "#09090b",
+    },
+    orange: {
+      50: "#fffbeb",
+      100: "#fef3c7",
+      200: "#fde68a",
+      300: "#fcd34d",
+      400: "#fbbf24",
+      500: "#f59e0b",
+      600: "#d97706",
+      700: "#b45309",
+      800: "#92400e",
+      900: "#78350f",
+      950: "#451a03",
     },
     // gray: {
     //   50: "#fafafa",
@@ -123,6 +152,8 @@ export const theme = extendTheme({
     },
   },
   components: {
+    Button,
+    Box,
     Tabs,
     Stack,
     HStack,

@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { add, subtract } from "math";
-import reactLogo from "./assets/react.svg";
+import { add, subtract } from "<PACKAGE_NAME_PLACEHOLDER>";
 import viteLogo from "/vite.svg";
-import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);

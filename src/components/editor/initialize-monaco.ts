@@ -4,41 +4,46 @@ import { Registry } from "monaco-textmate";
 import { loadWASM } from "onigasm";
 
 import tomorrowNight from "monaco-themes/themes/Tomorrow-Night.json";
+import githubLight from "monaco-themes/themes/GitHub Light.json";
+
 import { vsDarkPlus } from "./vs-dark-plus";
 import { convertVsCodeTheme } from "./define-theme";
 
+const themes = {
+  dark: convertVsCodeTheme(vsDarkPlus),
+  light: githubLight,
+};
+
+themes.dark.rules.push(
+  {
+    token: "entity.name.tag",
+    foreground: "#569cd6",
+  },
+  {
+    token: "entity.name.tag",
+    foreground: "#569cd6",
+  },
+  {
+    token: "entity.other.attribute-name",
+    foreground: "#9cdcfe",
+  },
+  {
+    foreground: "#569cd6",
+    token: "storage.type",
+  },
+  {
+    foreground: "#569cd6",
+    token: "storage.modifier",
+  },
+  {
+    foreground: "#ce9178",
+    token: "punctuation.definition.string",
+  }
+);
+themes.dark.colors["editor.background"] = "#18181B";
+themes.light.colors["editor.background"] = "#FAFAFA";
+
 export async function initializeMonaco(monaco: Monaco) {
-  console.log(tomorrowNight);
-
-  const theme = convertVsCodeTheme(vsDarkPlus);
-
-  theme.rules.push(
-    {
-      token: "entity.name.tag",
-      foreground: "#569cd6",
-    },
-    {
-      token: "entity.name.tag",
-      foreground: "#569cd6",
-    },
-    {
-      token: "entity.other.attribute-name",
-      foreground: "#9cdcfe",
-    },
-    {
-      foreground: "#569cd6",
-      token: "storage.type",
-    },
-    {
-      foreground: "#569cd6",
-      token: "storage.modifier",
-    },
-    {
-      foreground: "#ce9178",
-      token: "punctuation.definition.string",
-    }
-  );
-  theme.colors["editor.background"] = "#171717";
   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
   const compilerOptions = {
     target: monaco.languages.typescript.ScriptTarget.Latest,
@@ -70,8 +75,9 @@ export async function initializeMonaco(monaco: Monaco) {
   });
 
   //   monaco.editor.defineTheme("tomorrow-night", tomorrowNight as any);
-  monaco.editor.defineTheme("tomorrow-night", theme as any);
-  monaco.editor.setTheme("tomorrow-night");
+  monaco.editor.defineTheme("pkgbox-dark", themes.dark as any);
+  monaco.editor.defineTheme("pkgbox-light", themes.light as any);
+  // monaco.editor.setTheme("tomorrow-night");
 
   try {
     await loadWASM("/onigasm.wasm");

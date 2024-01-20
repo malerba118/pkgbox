@@ -12,26 +12,20 @@ const Folder = observer(({ folder }: { folder: FolderManager }) => {
       <Button
         pl={folder.pathLength * 8 + "px"}
         fontSize="sm"
-        variant="unstyled"
+        variant="list-item"
         onClick={() => {
           folder.setExpanded(!folder.expanded);
         }}
-        textAlign="start"
-        rounded="none"
         h="1.5rem"
         lineHeight="1.5rem"
         color="text-strong"
-        _hover={{
-          bg: "layer-1",
-        }}
         fontWeight={600}
-        transition="none"
-        display="flex"
-        justifyContent="start"
         gap={1}
       >
         {folder.expanded ? <FolderOpenIcon /> : <FolderClosedIcon />}
-        <span>{folder.name}</span>
+        <Text isTruncated pr="3">
+          {folder.name}
+        </Text>
       </Button>
       {folder.expanded && (
         <Box>

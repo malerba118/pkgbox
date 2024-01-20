@@ -15,14 +15,19 @@ const AppTabs = observer(() => {
       transform="translateX(-50%)"
       p={2.5}
       gap={4}
-      bg="whiteAlpha.500"
-      boxShadow={`2xl`}
+      boxShadow={`0px 2.2px 4px -10px rgba(0, 0, 0, 0.022),
+      0px 5.3px 9.6px -10px rgba(0, 0, 0, 0.032),
+      0px 10px 18.2px -10px rgba(0, 0, 0, 0.04),
+      0px 17.9px 32.4px -10px rgba(0, 0, 0, 0.048),
+      0px 33.4px 60.6px -10px rgba(0, 0, 0, 0.058),
+      0px 80px 145px -10px rgba(0, 0, 0, 0.08)`}
       border="faint"
       rounded="calc(0.75rem + 0.5rem)"
+      bg="whiteAlpha.200"
       _dark={{
-        background: `rgba(30, 30, 30, 0.5)`,
+        bg: "rgba(31, 31, 31, 0.6)",
       }}
-      backdropFilter="blur(16px)"
+      backdropFilter="blur(12px)"
       zIndex={100}
     >
       <Tabs
@@ -44,8 +49,9 @@ const AppTabs = observer(() => {
           <Tab>Tests</Tab>
         </TabList>
       </Tabs>
+
       <Box h={6} borderRight="vivid" />
-      <Button colorScheme="orange" rounded="xl" fontSize="sm">
+      <Button variant="primary" rounded="xl" fontSize="sm">
         Publish
       </Button>
     </HStack>

@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "math": "file:../.library/math-0.0.0.tgz"
+    "<PACKAGE_NAME_PLACEHOLDER>": "file:../.library/<PACKAGE_NAME_PLACEHOLDER>-0.0.0.tgz"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

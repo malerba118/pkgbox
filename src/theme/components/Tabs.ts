@@ -36,10 +36,15 @@ const enclosed = definePartsStyle({
 const fancy = definePartsStyle({
   // define the part you're going to style
   tab: {
-    // bg: "red.100",
     px: 3,
     rounded: "0.75rem",
     border: "1px solid transparent",
+    fontWeight: 600,
+    color: "text-strong",
+    _selected: {
+      bg: "blackAlpha.50",
+      border: "faint",
+    },
     _dark: {
       _hover: {},
       _active: {},
@@ -49,18 +54,7 @@ const fancy = definePartsStyle({
       },
     },
   },
-  tablist: {
-    // p: 2,
-    // gap: 0.5,
-    // bg: "whiteAlpha.500",
-    // boxShadow: `0px 24px 28px 0px rgba(0, 0, 0, 0.20)`,
-    // border: "faint",
-    // rounded: "calc(0.75rem + 0.5rem)",
-    // _dark: {
-    //   background: `linear-gradient(180deg, rgba(255, 255, 255, 0.04) -81.36%, rgba(255, 255, 255, 0.00) 214.41%)`,
-    // },
-    // backdropFilter: "blur(16px)",
-  },
+  tablist: {},
 });
 
 // export the component theme

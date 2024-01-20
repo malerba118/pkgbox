@@ -1,5 +1,5 @@
 {
-  "name": "math",
+  "name": "<PACKAGE_NAME_PLACEHOLDER>",
   "version": "0.0.0",
   "main": "index.ts",
   "devDependencies": {

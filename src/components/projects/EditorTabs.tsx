@@ -23,9 +23,10 @@ const EditorTabs = observer((props: EditorTabsProps) => {
       onChange={(index) => {
         project.activeApp.openFile(project.activeApp.tabs[index]);
       }}
-      overflow="auto"
+      overflowX="auto"
+      overflowY="hidden"
       size="sm"
-      h={10}
+      h="100%"
       {...props}
     >
       <TabList h="100%">

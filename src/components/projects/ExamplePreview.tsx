@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
-import { ProjectManager } from "../../state/project";
 import { ServerStatus } from "../../state/runners/example";
-import { chakra } from "@chakra-ui/react";
+import { Center, Spinner, chakra } from "@chakra-ui/react";
 import { useProject } from "./ProjectProvider";
 
 const ExamplePreview = observer(() => {
@@ -10,17 +9,14 @@ const ExamplePreview = observer(() => {
     !project.example.runner.url ||
     project.example.runner.serverStatus === ServerStatus.Starting
   ) {
-    return <div>Loading...</div>;
+    return (
+      <Center w="100%" h="100%">
+        <Spinner color="text-strong" />
+      </Center>
+    );
   }
 
-  return (
-    <chakra.iframe
-      src={project.example.runner.url}
-      pos="absolute"
-      w="100%"
-      h="100%"
-    />
-  );
+  return <chakra.iframe src={project.example.runner.url} w="100%" h="100%" />;
 });
 
 export default ExamplePreview;

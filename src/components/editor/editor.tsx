@@ -14,6 +14,7 @@ import {
 } from "react";
 import type { editor as EditorTypes } from "monaco-editor";
 import { initializeMonaco } from "./initialize-monaco";
+import { useColorModeValue } from "@chakra-ui/react";
 
 interface EditorProps extends ReactMonacoEditorProps {
   children?: ReactNode;
@@ -56,6 +57,7 @@ export const Editor = ({
 }: EditorProps) => {
   const [context, setContext] = useState<EditorContextData | null>(null);
   const highlighterDisposerRef = useRef<() => void>();
+  const theme = useColorModeValue("pkgbox-light", "pkgbox-dark");
 
   useEffect(() => {
     return () => {
@@ -74,7 +76,7 @@ export const Editor = ({
           setContext({ editor, monaco });
           onMount?.(editor, monaco);
         }}
-        theme="tomorrow-night"
+        theme={theme}
         options={{
           ...DEFAULT_OPTIONS,
           ...options,

@@ -30,13 +30,13 @@ export const getTemplate = (options: TemplateOptions): Template => {
     "devDependencies": {
       "vite": "latest",
       "vitest": "latest",
-      "math": "file:../.library/math-0.0.0.tgz"
+      "${options.name}": "file:../.library/${options.name}-0.0.0.tgz"
     }
   }
   `,
       },
-      "tests/math.test.ts": {
-        code: 'import { assert, expect, test } from "vitest";\nimport { add, subtract } from "math";\n\ntest("Add", () => {\n  expect(add(1, 1)).toBe(2);\n});\n\ntest("Subtract", () => {\n  expect(subtract(15, 3)).toBe(12);\n});\n',
+      "tests/browser.test.ts": {
+        code: 'import { assert, expect, test } from "vitest";\nimport { add, subtract } from "<PACKAGE_NAME_PLACEHOLDER>";\n\ntest("Add", () => {\n  expect(add(1, 1)).toBe(2);\n});\n\ntest("Subtract", () => {\n  expect(subtract(15, 3)).toBe(12);\n});\n',
       },
       "tsconfig.json": {
         code: '{\n  "compilerOptions": {\n    "target": "es2020",\n    "module": "node16",\n    "strict": true,\n    "declaration": true,\n    "declarationMap": true,\n    "sourceMap": true,\n    "verbatimModuleSyntax": true\n  },\n  "include": ["tests"],\n  "exclude": ["node_modules"]\n}\n',

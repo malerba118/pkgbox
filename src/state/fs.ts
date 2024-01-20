@@ -58,6 +58,10 @@ export class FileManager extends NodeManager {
     });
   }
 
+  get isActive() {
+    return this.app.activeFileId === this.id;
+  }
+
   setContents(contents: string) {
     this.contents = contents;
   }

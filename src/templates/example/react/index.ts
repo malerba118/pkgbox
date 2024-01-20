@@ -20,14 +20,8 @@ const files = {
   "public/vite.svg": {
     code: require("!!raw-loader!./files/public/vite.svg").default,
   },
-  "src/App.css": {
-    code: require("!!raw-loader!./files/src/App.css").default,
-  },
   "src/App.tsx": {
     code: require("!!raw-loader!./files/src/App.tsx").default,
-  },
-  "src/assets/react.svg": {
-    code: require("!!raw-loader!./files/src/assets/react.svg").default,
   },
   "src/index.css": {
     code: require("!!raw-loader!./files/src/index.css").default,
@@ -53,38 +47,19 @@ const getAppTsx = (options: TemplateOptions) => {
   if (options.library === LibraryTemplateType.React)
     return `import { useState } from "react";
 import { Button } from "${options.name}";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
+    <div className="center overlay">
       <h1>Count: {count}</h1>
-      <div className="card">
-        <Button
-          onClick={() => setCount(count => count + 1)}
-        >
-          Increment
-        </Button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <Button
+        onClick={() => setCount(count => count + 1)}
+      >
+        Increment
+      </Button>
+    </div>
   );
 }
 
@@ -139,13 +114,17 @@ export default App;
 };
 
 export const getFiles = (options: TemplateOptions) => {
-  const pkg = JSON.parse(files["package.json"].code);
-  pkg.dependencies[options.name] = `file:../.library/${options.name}-0.0.0.tgz`;
-  return {
+  let processedFiles = {
     ...files,
-    "package.json": { code: JSON.stringify(pkg, null, 2) },
     "src/App.tsx": {
       code: getAppTsx(options) as string,
     },
   };
+  Object.keys(processedFiles).forEach((key) => {
+    processedFiles[key].code = processedFiles[key].code.replaceAll(
+      "<PACKAGE_NAME_PLACEHOLDER>",
+      options.name
+    );
+  });
+  return processedFiles;
 };
