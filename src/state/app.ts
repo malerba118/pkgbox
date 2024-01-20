@@ -79,6 +79,7 @@ export abstract class AppManager {
   }
 
   setActiveFileId(fileId: string | null) {
+    this.activeFile?.save();
     this.activeFileId = fileId;
   }
 

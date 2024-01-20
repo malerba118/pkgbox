@@ -5,6 +5,9 @@ import { useEditor } from "./editor";
 import { useEffect, useState } from "react";
 import { ProjectManager } from "../../state/project";
 import { FileMap } from "../../state/types";
+import { ModelFile } from "./models";
+import { useProject } from "../projects/ProjectProvider";
+import { useQuery } from "react-query";
 
 interface DeclarationFileProps {
   path: string;
@@ -26,30 +29,4 @@ const DeclarationFile = ({ path, contents }: DeclarationFileProps) => {
   return null;
 };
 
-interface PackageDeclarationsProps {
-  appName: string;
-  packageName: string;
-  project: ProjectManager;
-}
-
-export const PackageDeclarations = ({
-  appName,
-  packageName,
-  project,
-}: PackageDeclarationsProps) => {
-  const [fileMap, setFileMap] = useState<FileMap>({});
-
-  useEffect(() => {
-    project.emulator
-      .get(`/${appName}/declarations/${encodeURIComponent(packageName)}`)
-      .then(setFileMap);
-  }, [packageName]);
-
-  return Object.entries(fileMap).map(([path, file]) => (
-    <DeclarationFile
-      key={path}
-      path={`file:///node_modules/${packageName}/${path}`}
-      contents={file.code}
-    />
-  ));
-};
+export default DeclarationFile;

@@ -1,5 +1,6 @@
 import { TemplateOptions } from "../..";
 import { LibraryTemplateType } from "../../library";
+import { renderFiles } from "../../utils";
 
 const files = {
   ".eslintrc.cjs": {
@@ -114,17 +115,15 @@ export default App;
 };
 
 export const getFiles = (options: TemplateOptions) => {
-  let processedFiles = {
-    ...files,
-    "src/App.tsx": {
-      code: getAppTsx(options) as string,
+  return renderFiles(
+    {
+      ...files,
+      "src/App.tsx": {
+        code: getAppTsx(options) as string,
+      },
     },
-  };
-  Object.keys(processedFiles).forEach((key) => {
-    processedFiles[key].code = processedFiles[key].code.replaceAll(
-      "<PACKAGE_NAME_PLACEHOLDER>",
-      options.name
-    );
-  });
-  return processedFiles;
+    {
+      name: options.name,
+    }
+  );
 };

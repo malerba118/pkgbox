@@ -1,4 +1,5 @@
 import { TemplateOptions } from "../..";
+import { renderFiles } from "../../utils";
 
 const files = {
   "index.ts": {
@@ -22,7 +23,7 @@ const files = {
 };
 
 export const getFiles = (options: TemplateOptions) => {
-  const pkg = JSON.parse(files["package.json"].code);
-  pkg.name = options.name;
-  return { ...files, "package.json": { code: JSON.stringify(pkg, null, 2) } };
+  return renderFiles(files, {
+    name: options.name,
+  });
 };

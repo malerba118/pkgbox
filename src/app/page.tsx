@@ -29,18 +29,12 @@ import ExamplePreview from "../components/projects/ExamplePreview";
 import EditorTabs from "../components/projects/EditorTabs";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
 import AppTabs from "../components/projects/AppTabs";
-import Folder from "../components/projects/Folder";
 import Sidebar from "../components/projects/Sidebar";
-import StatusBadge from "../components/StatusBadge";
 import BuildStatus from "../components/projects/BuildStatus";
 import TestsPreview from "../components/projects/TestsPreview";
 import PreviewTabs from "../components/projects/PreviewTabs";
 import Image from "next/image";
 import logo from "../../public/logo.png";
-
-const Overlay = chakra("div", {
-  baseStyle: { pos: "absolute", inset: 0, rounded: "inherit" },
-});
 
 const ProjectPage = observer(() => {
   const project = useProject();

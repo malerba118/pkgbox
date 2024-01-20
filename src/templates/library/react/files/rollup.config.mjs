@@ -11,9 +11,15 @@ const copyPackageJson = () => ({
   generateBundle() {
     const modifiedPackageJson = {
       ...packageJson,
-      main: "index.js",
-      module: "index.mjs",
-      typings: "index.d.ts",
+      main: "./index.js",
+      module: "./index.mjs",
+      types: "./index.d.ts",
+      exports: {
+        ".": {
+          import: "./index.mjs",
+          require: "./index.js",
+        },
+      },
     };
     this.emitFile({
       type: "asset",

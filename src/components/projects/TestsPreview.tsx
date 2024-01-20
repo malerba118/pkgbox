@@ -22,7 +22,7 @@ const TestsPreview = observer(() => {
   }
 
   return (
-    <Box w="100%" h="100%" overflow="auto" p={4}>
+    <Box w="100%" h="100%" overflow="auto" p={4} fontSize="sm">
       <pre>{JSON.stringify(project.tests.runner.results, null, 2)}</pre>
     </Box>
   );

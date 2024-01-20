@@ -36,7 +36,7 @@ export class ExampleRunner extends Runner {
   debounced = {
     updateFiles: debounce((files: EmulatorFiles) => {
       this.updateFiles(files);
-    }, 1200),
+    }, 0),
   };
 
   setServerStatus(status: ServerStatus) {

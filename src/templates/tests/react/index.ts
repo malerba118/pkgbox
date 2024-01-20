@@ -2,23 +2,23 @@ import { TemplateOptions } from "../..";
 import { renderFiles } from "../../utils";
 
 const files = {
-  "index.tsx": {
-    code: require("!!raw-loader!./files/index.tsx").default,
-  },
-  "styles.module.css": {
-    code: require("!!raw-loader!./files/styles.module.css").default,
+  "README.md": {
+    code: require("!!raw-loader!./files/README.md").default,
   },
   "package.json": {
     code: require("!!raw-loader!./files/package.json").default,
   },
+  "tests/browser.test.ts": {
+    code: require("!!raw-loader!./files/tests/browser.test.ts").default,
+  },
   "tsconfig.json": {
     code: require("!!raw-loader!./files/tsconfig.json").default,
   },
-  "rollup.config.mjs": {
-    code: require("!!raw-loader!./files/rollup.config.mjs").default,
+  "output.json": {
+    code: require("!!raw-loader!./files/output.json").default,
   },
-  "globals.d.ts": {
-    code: require("!!raw-loader!./files/globals.d.ts").default,
+  "vite.config.ts": {
+    code: require("!!raw-loader!./files/vite.config.ts").default,
   },
 };
 

@@ -24,7 +24,7 @@ export class TestsRunner extends Runner {
   debounced = {
     updateFiles: debounce((files: EmulatorFiles) => {
       this.updateFiles(files);
-    }, 1200),
+    }, 0),
   };
 
   init = async (files: EmulatorFiles, packageId: string) => {

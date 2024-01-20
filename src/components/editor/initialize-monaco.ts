@@ -54,7 +54,7 @@ export async function initializeMonaco(monaco: Monaco) {
     typeRoots: ["node_modules/@types"],
     allowSyntheticDefaultImports: true,
     allowJs: true,
-    strict: false,
+    strict: true,
     noImplicitAny: false,
     allowImportingTsExtensions: true,
     noEmit: true,

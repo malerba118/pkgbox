@@ -117,7 +117,7 @@ export const files = {
                 if (stats.isDirectory()) {
                     readDeclarationFiles(filePath, baseDir, obj);
                 } else {
-                    if (path.extname(file) === '.ts' && file.endsWith('.d.ts')) {
+                    if (path.extname(file) === '.ts' && file.endsWith('.d.ts') || file.includes('package.json') || file.includes('package-lock.json')) {
                         const fileContents = fs.readFileSync(filePath, 'utf8');
                         obj[relativePath] = { code: fileContents };
                     }
@@ -231,13 +231,21 @@ export const files = {
         
                 const declarationFiles = readDeclarationFiles(packagePath);
         
-                // Read the package.json file without parsing it
-                const packageJsonPath = path.join(packagePath, 'package.json');
-                if (fs.existsSync(packageJsonPath)) {
-                    const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                    const relativePath = path.relative(packagePath, packageJsonPath);
-                    declarationFiles[relativePath] = { code: packageJsonContents };
+                res.json(declarationFiles);
+            } catch (error) {
+                res.status(500).send({ error: 'Error processing request', details: error.message });
+            }
+        });
+
+        app.get('/library/declarations', async (req, res) => {
+            try {
+                const nodeModulesPath = path.join(libraryDir, 'node_modules');
+        
+                if (!fs.existsSync(nodeModulesPath)) {
+                    return res.status(404).send({ error: 'node_modules not found' });
                 }
+        
+                const declarationFiles = readDeclarationFiles(nodeModulesPath);
         
                 res.json(declarationFiles);
             } catch (error) {
@@ -307,13 +315,21 @@ export const files = {
     
             const declarationFiles = readDeclarationFiles(packagePath);
     
-            // Read the package.json file without parsing it
-            const packageJsonPath = path.join(packagePath, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                const relativePath = path.relative(packagePath, packageJsonPath);
-                declarationFiles[relativePath] = { code: packageJsonContents };
+            res.json(declarationFiles);
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
+
+    app.get('/example/declarations', async (req, res) => {
+        try {
+            const nodeModulesPath = path.join(exampleDir, 'node_modules');
+    
+            if (!fs.existsSync(nodeModulesPath)) {
+                return res.status(404).send({ error: 'node_modules not found' });
             }
+    
+            const declarationFiles = readDeclarationFiles(nodeModulesPath);
     
             res.json(declarationFiles);
         } catch (error) {
@@ -382,13 +398,22 @@ export const files = {
     
             const declarationFiles = readDeclarationFiles(packagePath);
     
-            // Read the package.json file without parsing it
-            const packageJsonPath = path.join(packagePath, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                const relativePath = path.relative(packagePath, packageJsonPath);
-                declarationFiles[relativePath] = { code: packageJsonContents };
+            res.json(declarationFiles);
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
+
+
+    app.get('/tests/declarations', async (req, res) => {
+        try {
+            const nodeModulesPath = path.join(testsDir, 'node_modules');
+    
+            if (!fs.existsSync(nodeModulesPath)) {
+                return res.status(404).send({ error: 'node_modules not found' });
             }
+    
+            const declarationFiles = readDeclarationFiles(nodeModulesPath);
     
             res.json(declarationFiles);
         } catch (error) {

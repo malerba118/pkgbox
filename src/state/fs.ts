@@ -48,13 +48,17 @@ export class NodeManager {
 
 export class FileManager extends NodeManager {
   contents: string;
+  draftContents: string;
 
   constructor(data: AppFile, app: AppManager) {
     super(data, app);
     this.contents = data.contents;
+    this.draftContents = data.contents;
     makeObservable(this, {
       contents: observable.ref,
+      draftContents: observable.ref,
       setContents: action,
+      setDraftContents: action,
     });
   }
 
@@ -64,6 +68,19 @@ export class FileManager extends NodeManager {
 
   setContents(contents: string) {
     this.contents = contents;
+    this.draftContents = contents;
+  }
+
+  setDraftContents(draftContents: string) {
+    this.draftContents = draftContents;
+  }
+
+  save() {
+    this.setContents(this.draftContents);
+  }
+
+  get isDirty() {
+    return this.draftContents !== this.contents;
   }
 
   open() {
