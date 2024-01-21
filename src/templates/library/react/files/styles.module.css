@@ -1,11 +1,13 @@
 .button {
-  height: 2.25rem;
+  height: 2.5rem;
   border-radius: 0.75rem;
-  color: white;
+  color: rgba(0, 0, 0, 0.8);
   padding-inline: 1rem;
-  background: linear-gradient(180deg, #575757 -6.13%, #262626 108.02%);
-  box-shadow: 0px 2px 2px 0px rgba(255, 255, 255, 0.5) inset,
-    0px -3px 3px 0px #000 inset;
-  border: none;
+  background: linear-gradient(
+    0deg,
+    #ebedf1 -22.86%,
+    rgba(220, 223, 228, 0) 117.14%
+  );
+  border: 1px solid rgba(0, 0, 0, 0.04);
   cursor: pointer;
 }

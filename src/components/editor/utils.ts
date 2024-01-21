@@ -11,14 +11,17 @@ export const tsConfigToCompilerOptions = (
   return {
     ...compilerOptions,
     target: mapTarget(compilerOptions?.target),
-    module: mpaModule(compilerOptions?.module),
+    module: mapModule(compilerOptions?.module),
     moduleResolution: mapModuleResolution(compilerOptions?.moduleResolution),
+    allowJs: true,
   };
 };
 
-function mapTarget(scriptTarget: any): CompilerOptions["target"] {
+function mapTarget(
+  scriptTarget: string | undefined
+): CompilerOptions["target"] {
   const monacoScriptTarget = monaco.languages.typescript.ScriptTarget;
-  switch (scriptTarget.toLowerCase()) {
+  switch (scriptTarget?.toLowerCase()) {
     case "es3":
       return monacoScriptTarget.ES3;
     case "es5":
@@ -49,11 +52,11 @@ function mapTarget(scriptTarget: any): CompilerOptions["target"] {
   }
 }
 
-function mapModuleResolution(moduleResolution: string) {
+function mapModuleResolution(moduleResolution: string | undefined) {
   const monacoModuleResolution =
     monaco.languages.typescript.ModuleResolutionKind;
 
-  switch (moduleResolution.toLowerCase()) {
+  switch (moduleResolution?.toLowerCase()) {
     case "classic":
       return monacoModuleResolution.Classic;
     case "node":
@@ -64,10 +67,10 @@ function mapModuleResolution(moduleResolution: string) {
   }
 }
 
-function mpaModule(moduleType: string) {
+function mapModule(moduleType: string | undefined) {
   const monacoModuleKind = monaco.languages.typescript.ModuleKind;
 
-  switch (moduleType.toLowerCase()) {
+  switch (moduleType?.toLowerCase()) {
     case "none":
       return monacoModuleKind.None;
     case "commonjs":

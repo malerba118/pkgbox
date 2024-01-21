@@ -53,14 +53,14 @@ const ProjectPage = observer(() => {
           <Box boxSize={8} _light={{ filter: "invert(1)" }}>
             <Image src={logo} alt="pkgbox logo" />
           </Box>
-          <Text
+          {/* <Text
             fontSize="sm"
             fontWeight={600}
             fontFamily="var(--font-inter)"
             color="text-vivid"
           >
             pkgbox
-          </Text>
+          </Text> */}
         </HStack>
         <Box flex={1} />
         <DarkModeSwitch

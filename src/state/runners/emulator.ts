@@ -74,10 +74,14 @@ export class Emulator {
       { requestId, method: "POST", url, body },
       "*"
     );
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const listener = (event: any) => {
         if (event.data?.requestId === requestId) {
-          resolve(event.data.body);
+          if (event.data.ok) {
+            resolve(event.data.body);
+          } else {
+            reject(event.data.body);
+          }
           window.removeEventListener("message", listener);
         }
       };
@@ -91,10 +95,14 @@ export class Emulator {
       { requestId, method: "GET", url },
       "*"
     );
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const listener = (event: any) => {
         if (event.data?.requestId === requestId) {
-          resolve(event.data.body);
+          if (event.data.ok) {
+            resolve(event.data.body);
+          } else {
+            reject(event.data.body);
+          }
           window.removeEventListener("message", listener);
         }
       };

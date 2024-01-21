@@ -28,7 +28,6 @@ export class LibraryManager extends AppManager {
       }
     );
     this.runner.onBuild((result) => {
-      console.log(result);
       if (result.files) {
         Object.keys(result.files).forEach((filePath) => {
           this.createFileFromPath({

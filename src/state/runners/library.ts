@@ -60,15 +60,22 @@ export class LibraryRunner extends Runner {
 
   build = this.AsyncQueue.Fn(async (): Promise<BuildResult> => {
     this.setBuildStatus(AsyncStatus.Pending);
-    const result = await this.emulator.post("/library/build");
-    if (result.error) {
-      this.setBuildStatus(AsyncStatus.Error);
-    } else {
+    try {
+      const result = await this.emulator.post("/library/build");
       this.setBuildStatus(AsyncStatus.Success);
+      this.buildCount++;
+      this.events.emit("build", { ...result, buildCount: this.buildCount });
+      return result;
+    } catch (err) {
+      this.setBuildStatus(AsyncStatus.Error);
+      throw err;
     }
-    this.buildCount++;
-    this.events.emit("build", { ...result, buildCount: this.buildCount });
-    return result;
+    // const result = await this.emulator.post("/library/build");
+    // if (result.error) {
+    //   this.setBuildStatus(AsyncStatus.Error);
+    // } else {
+    //   this.setBuildStatus(AsyncStatus.Success);
+    // }
   });
 
   onBuild = (subscriber: Subscriber<BuildResult>) => {

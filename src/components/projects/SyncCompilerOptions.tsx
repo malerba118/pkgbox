@@ -8,10 +8,14 @@ const SyncCompilerOptions = () => {
   const { monaco } = useEditor();
 
   useEffect(() => {
+    const compilerOptions = tsConfigToCompilerOptions(
+      project.activeApp.typescriptConfig?.compilerOptions || {}
+    );
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
-      tsConfigToCompilerOptions(
-        project.activeApp.typescriptConfig?.compilerOptions || {}
-      )
+      compilerOptions
+    );
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
+      compilerOptions
     );
   }, [monaco, project.activeApp.typescriptConfig]);
 

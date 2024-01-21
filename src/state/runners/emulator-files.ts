@@ -60,10 +60,11 @@ export const files = {
                           },
                         }
                       )
-                      .then((res) => res.json())
-                      .then((data) => {
+                      .then(async (res) => {
+                        data = await res.json()
                         window.parent.postMessage({
                           requestId: event.data.requestId, 
+                          ok: res.ok,
                           body: data 
                         }, "*")
                       })
