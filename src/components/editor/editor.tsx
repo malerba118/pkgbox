@@ -15,6 +15,9 @@ import {
 import type { editor as EditorTypes } from "monaco-editor";
 import { initializeMonaco } from "./initialize-monaco";
 import { useColorModeValue } from "@chakra-ui/react";
+import AutoImport, { regexTokeniser } from "./auto-import";
+
+// const reactDeclarations = require("!!raw-loader!./react.d.ts").default;
 
 interface EditorProps extends ReactMonacoEditorProps {
   children?: ReactNode;
@@ -23,6 +26,7 @@ interface EditorProps extends ReactMonacoEditorProps {
 interface EditorContextData {
   editor: EditorTypes.IStandaloneCodeEditor;
   monaco: Monaco;
+  completor: AutoImport;
 }
 
 const EditorContext = createContext<EditorContextData | null>(null);
@@ -73,7 +77,22 @@ export const Editor = ({
         {...otherProps}
         beforeMount={initializeMonaco}
         onMount={(editor, monaco) => {
-          setContext({ editor, monaco });
+          const completor = new AutoImport({
+            monaco: monaco,
+            editor: editor,
+            spacesBetweenBraces: true,
+            doubleQuotes: true,
+            semiColon: true,
+            alwaysApply: true,
+          });
+          // completor.imports.saveFiles([
+          //   {
+          //     path: "./node_modules/@types/react/index.d.ts",
+          //     aliases: ["react"],
+          //     imports: regexTokeniser(reactDeclarations),
+          //   },
+          // ]);
+          setContext({ editor, monaco, completor });
           onMount?.(editor, monaco);
         }}
         theme={theme}

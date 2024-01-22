@@ -9,6 +9,7 @@ import { ModelFile } from "../editor/models";
 import { InitializationStatus } from "../../state/runners/runner";
 import { NodeModules } from "./NodeModules";
 import SyncCompilerOptions from "./SyncCompilerOptions";
+import PackageImports from "./PackageImports";
 
 const ProjectEditor = observer(() => {
   const project = useProject();
@@ -57,17 +58,20 @@ const ProjectEditor = observer(() => {
           //   enabled: true,
           // },
           // wordBasedSuggestions: "allDocuments",
-          // quickSuggestions: true,
+          quickSuggestions: true,
           // snippetSuggestions: "bottom",
-          suggest: {
-            showValues: true,
-            showConstants: true,
-            showVariables: true,
-            showClasses: true,
-            showFunctions: true,
-            showConstructors: true,
-            showEnums: true,
-          },
+          // suggest: {
+          // showValues: true,
+          // showConstants: true,
+          // showVariables: true,
+          // showClasses: true,
+          // showFunctions: true,
+          // showConstructors: true,
+          // showEnums: true,
+          // showFiles: true,
+          // showFolders: true,
+          // },
+          suggestOnTriggerCharacters: true,
         }}
       >
         <SyncCompilerOptions />
@@ -83,6 +87,7 @@ const ProjectEditor = observer(() => {
           InitializationStatus.Initialized && (
           <>
             <NodeModules appName={project.activeAppId} />
+            {/* <PackageImports appName={project.activeAppId} /> */}
             {/* {Object.keys(project.activeApp.dependencies).map((packageName) => (
               <PackageDeclarations
                 key={packageName + project.activeAppId}

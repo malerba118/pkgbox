@@ -17,7 +17,7 @@ const SyncCompilerOptions = () => {
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
       compilerOptions
     );
-  }, [monaco, project.activeApp.typescriptConfig]);
+  }, [project.activeApp.typescriptConfig]);
 
   return null;
 };

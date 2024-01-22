@@ -102,6 +102,41 @@ export const files = {
             return obj;
         }
 
+        function findRootDeclarationFile(baseDir, packageName) {
+            let declarationFilePath = getDeclarationFilePath(baseDir, packageName);
+        
+            // Fallback to @types directory for community-provided types
+            if (!declarationFilePath) {
+                declarationFilePath = getDeclarationFilePath(baseDir, \`@types/\${packageName}\`);
+            }
+        
+            if (declarationFilePath) {
+                return {
+                    path: path.relative(baseDir, declarationFilePath),
+                    contents: fs.readFileSync(declarationFilePath, 'utf8')
+                };
+            }
+        
+            return null;
+        }
+        
+        function getDeclarationFilePath(baseDir, packageName) {
+            const depPath = path.join(baseDir, 'node_modules', packageName);
+            const depPackageJsonPath = path.join(depPath, 'package.json');
+        
+            if (fs.existsSync(depPackageJsonPath)) {
+                const depPackageJson = JSON.parse(fs.readFileSync(depPackageJsonPath, 'utf8'));
+                const mainFile = depPackageJson.types || depPackageJson.typings || 'index.d.ts';
+                const declarationFilePath = path.join(depPath, mainFile);
+        
+                if (fs.existsSync(declarationFilePath)) {
+                    return declarationFilePath;
+                }
+            }
+        
+            return null;
+        }
+
 
         function readDeclarationFiles(dir, baseDir = dir, obj = {}) {
             const files = fs.readdirSync(dir);
@@ -253,7 +288,31 @@ export const files = {
                 res.status(500).send({ error: 'Error processing request', details: error.message });
             }
         });
-  
+
+        app.get('/library/imports', async (req, res) => {
+            try {
+                const packageJsonPath = path.join(libraryDir, 'package.json');
+                
+                if (!fs.existsSync(packageJsonPath)) {
+                    return res.status(404).send({ error: 'package.json not found' });
+                }
+        
+                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+                const declarationFiles = {};
+        
+                for (const [dep, version] of Object.entries(dependencies)) {
+                    const declarationInfo = findRootDeclarationFile(libraryDir, dep);
+                    
+                    declarationFiles[dep] = declarationInfo || null;
+                }
+        
+                res.json(declarationFiles);
+            } catch (error) {
+                res.status(500).send({ error: 'Error processing request', details: error.message });
+            }
+        });
+        
         app.post('/example/files', async (req, res) => {     
           let packageJsonUpdated = false;
       

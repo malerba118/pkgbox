@@ -1,13 +1,7 @@
 "use client";
 
-import { useLatestRef } from "@chakra-ui/hooks";
 import { useEditor } from "./editor";
-import { useEffect, useState } from "react";
-import { ProjectManager } from "../../state/project";
-import { FileMap } from "../../state/types";
-import { ModelFile } from "./models";
-import { useProject } from "../projects/ProjectProvider";
-import { useQuery } from "react-query";
+import { useEffect } from "react";
 
 interface DeclarationFileProps {
   path: string;

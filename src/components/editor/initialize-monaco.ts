@@ -45,29 +45,29 @@ themes.light.colors["editor.background"] = "#FAFAFA";
 
 export async function initializeMonaco(monaco: Monaco) {
   monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
-  const compilerOptions = {
-    // target: monaco.languages.typescript.ScriptTarget.Latest,
-    // allowNonTsExtensions: true,
-    // resolveJsonModule: true,
-    // moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-    // module: monaco.languages.typescript.ModuleKind.CommonJS,
-    // typeRoots: ["node_modules/@types"],
-    // allowSyntheticDefaultImports: true,
-    // allowJs: true,
-    // strict: true,
-    // noImplicitAny: false,
-    // allowImportingTsExtensions: true,
-    // noEmit: true,
-    // esModuleInterop: true,
-    // jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
-    // reactNamespace: "React",
-  };
-  monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
-    compilerOptions
-  );
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
-    compilerOptions
-  );
+  // const compilerOptions = {
+  //   target: monaco.languages.typescript.ScriptTarget.Latest,
+  //   allowNonTsExtensions: true,
+  //   resolveJsonModule: true,
+  //   moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+  //   module: monaco.languages.typescript.ModuleKind.CommonJS,
+  //   typeRoots: ["node_modules/@types"],
+  //   allowSyntheticDefaultImports: true,
+  //   allowJs: true,
+  //   strict: true,
+  //   noImplicitAny: false,
+  //   allowImportingTsExtensions: true,
+  //   noEmit: true,
+  //   esModuleInterop: true,
+  //   jsx: monaco.languages.typescript.JsxEmit.Preserve,
+  //   reactNamespace: "React",
+  // };
+  // monaco.languages.typescript.typescriptDefaults.setCompilerOptions(
+  //   compilerOptions
+  // );
+  // monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
+  //   compilerOptions
+  // );
 
   monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
     noSemanticValidation: false,
@@ -120,10 +120,10 @@ export async function initializeMonaco(monaco: Monaco) {
   grammars.set("javascript", "source.jsx");
   grammars.set("typescript", "source.tsx");
 
-  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-    jsx: monaco.languages.typescript.JsxEmit.Preserve,
-    esModuleInterop: true,
-  });
+  // monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+  //   jsx: monaco.languages.typescript.JsxEmit.Preserve,
+  //   esModuleInterop: true,
+  // });
 
   /* Wire up TextMate grammars */
   await wireTmGrammars(monaco, registry, grammars);

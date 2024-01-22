@@ -48,6 +48,7 @@ export abstract class AppManager {
       files: computed,
       folders: computed,
       nodes: computed,
+      typescriptConfig: computed({ keepAlive: true }),
       activeFileId: observable.ref,
       setActiveFileId: action,
       createFileFromPath: action,

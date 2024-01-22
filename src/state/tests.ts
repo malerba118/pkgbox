@@ -16,7 +16,6 @@ export class TestsManager extends AppManager {
         if (
           this.runner.initializationStatus === InitializationStatus.Initialized
         ) {
-          console.log("maybe");
           this.runner.debounced.updateFiles(this.toFileMap());
         }
       },

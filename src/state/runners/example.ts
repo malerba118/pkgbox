@@ -92,6 +92,7 @@ export class ExampleRunner extends Runner {
       const unsubscribe = this.emulator.container.on(
         "server-ready",
         (port, url) => {
+          console.log("EXAMPLE SERVER READY");
           runInAction(() => {
             this.port = port;
             this.url = url;
