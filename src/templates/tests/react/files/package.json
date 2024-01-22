@@ -1,0 +1,15 @@
+{
+  "name": "@vitest/tests",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vite": "latest",
+    "vitest": "latest",
+    "<PACKAGE_NAME_PLACEHOLDER>": "file:../.library/<PACKAGE_NAME_PLACEHOLDER>-0.0.0.tgz"
+  }
+}

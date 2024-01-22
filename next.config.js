@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.module.rules.push({
+        test: /\.txt$/, // or whatever file type you want to import as string
+        use: "raw-loader",
+      });
+    }
+    return config;
+  },
   async headers() {
     return [
       {

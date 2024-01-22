@@ -36,7 +36,7 @@ export class ExampleRunner extends Runner {
   debounced = {
     updateFiles: debounce((files: EmulatorFiles) => {
       this.updateFiles(files);
-    }, 1000),
+    }, 0),
   };
 
   setServerStatus(status: ServerStatus) {
@@ -52,31 +52,29 @@ export class ExampleRunner extends Runner {
     // await this.startServer();
   };
 
-  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+  updateFiles = async (files: EmulatorFiles) => {
     console.log("Updating example files");
     return this.emulator.post("/example/files", files);
-  });
+  };
 
-  install = this.AsyncQueue.Fn(
-    async (
-      dependencies: string[] = [],
-      options: InstallOptions = { force: false }
-    ) => {
-      console.log("Installing example dependencies");
-      this.installProcess?.kill();
-      this.installProcess = await this.emulator.run("npm", [
-        "--prefix",
-        ".example",
-        "install",
-        "--no-audit",
-        "--no-fund",
-        "--no-progress",
-        // "--no-package-lock",
-        ...dependencies,
-      ]);
-      return this.installProcess.exit;
-    }
-  );
+  install = async (
+    dependencies: string[] = [],
+    options: InstallOptions = { force: false }
+  ) => {
+    console.log("Installing example dependencies");
+    this.installProcess?.kill();
+    this.installProcess = await this.emulator.run("npm", [
+      "--prefix",
+      ".example",
+      "install",
+      "--no-audit",
+      "--no-fund",
+      "--no-progress",
+      // "--no-package-lock",
+      ...dependencies,
+    ]);
+    return this.installProcess.exit;
+  };
 
   start = async () => {
     this.setServerStatus(ServerStatus.Starting);
@@ -92,6 +90,7 @@ export class ExampleRunner extends Runner {
       const unsubscribe = this.emulator.container.on(
         "server-ready",
         (port, url) => {
+          console.log("EXAMPLE SERVER READY");
           runInAction(() => {
             this.port = port;
             this.url = url;

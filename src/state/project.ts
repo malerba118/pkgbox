@@ -4,6 +4,11 @@ import { LibraryManager } from "./library";
 import { ExampleManager } from "./example";
 import { Emulator } from "./runners/emulator";
 import { TestsManager } from "./tests";
+import { nanoid } from "nanoid";
+import { TemplateOptions, getTemplate } from "../templates";
+import { LibraryTemplateType } from "../templates/library";
+import { ExampleTemplateType } from "../templates/example";
+import { createAsyncQueue } from "../lib/async";
 
 export class ProjectManager {
   id: string;
@@ -16,33 +21,60 @@ export class ProjectManager {
   tests: TestsManager;
   initCount: number = 0;
 
-  constructor(data: Project, emulator: Emulator) {
-    this.id = data.id;
-    this.name = data.name;
+  constructor(data: Project | TemplateOptions, emulator: Emulator) {
     this.activeAppId = "library";
     this.activePreview = "example";
     this.emulator = emulator;
-    this.library = new LibraryManager(
-      {
-        files: data.files.filter((file) => file.app_id === "library"),
-        folders: data.folders.filter((folder) => folder.app_id === "library"),
-      },
-      this
-    );
-    this.example = new ExampleManager(
-      {
-        files: data.files.filter((file) => file.app_id === "example"),
-        folders: data.folders.filter((folder) => folder.app_id === "example"),
-      },
-      this
-    );
-    this.tests = new TestsManager(
-      {
-        files: data.files.filter((file) => file.app_id === "tests"),
-        folders: data.folders.filter((folder) => folder.app_id === "tests"),
-      },
-      this
-    );
+    if ("id" in data) {
+      this.id = data.id;
+      this.name = data.name;
+      this.library = new LibraryManager(
+        {
+          files: data.files.filter((file) => file.app_id === "library"),
+          folders: data.folders.filter((folder) => folder.app_id === "library"),
+        },
+        this
+      );
+      this.example = new ExampleManager(
+        {
+          files: data.files.filter((file) => file.app_id === "example"),
+          folders: data.folders.filter((folder) => folder.app_id === "example"),
+        },
+        this
+      );
+      this.tests = new TestsManager(
+        {
+          files: data.files.filter((file) => file.app_id === "tests"),
+          folders: data.folders.filter((folder) => folder.app_id === "tests"),
+        },
+        this
+      );
+    } else {
+      this.id = nanoid();
+      this.name = data.name;
+      this.library = new LibraryManager(
+        {
+          files: [],
+          folders: [],
+        },
+        this
+      );
+      this.example = new ExampleManager(
+        {
+          files: [],
+          folders: [],
+        },
+        this
+      );
+      this.tests = new TestsManager(
+        {
+          files: [],
+          folders: [],
+        },
+        this
+      );
+      this.createFilesFromTemplate(getTemplate(data));
+    }
     makeObservable(this, {
       activeAppId: observable.ref,
       setActiveAppId: action,
@@ -50,7 +82,7 @@ export class ProjectManager {
       setActivePreview: action,
       createFilesFromTemplate: action,
     });
-    this.library.runner.onBuild(async (result) => {
+    const afterBuild = this.emulator.AsyncQueue.Fn(async (result) => {
       if (this.activePreview === "example") {
         if (result.buildCount > 1)
           await this.example.runner.install([result.packageId]);
@@ -68,6 +100,7 @@ export class ProjectManager {
         // await this.example.runner.startServer();
       }
     });
+    this.library.runner.onBuild(afterBuild);
     reaction(
       () => this.activePreview,
       () => {
@@ -117,10 +150,16 @@ export class ProjectManager {
 
   createFilesFromTemplate(template: Template) {
     this.library.createFilesFromFileMap(template.library);
-    this.library.setActiveFileId(this.library.entrypoint?.id || null);
+    if (this.library.entrypoint) this.library.openFile(this.library.entrypoint);
+    // this.library.files.forEach((f) => this.library.openFile(f));
     this.example.createFilesFromFileMap(template.example);
-    this.example.setActiveFileId(this.example.entrypoint?.id || null);
+    if (this.example.entrypoint) this.example.openFile(this.example.entrypoint);
+    // this.example.files.forEach((f) => this.example.openFile(f));
     this.tests.createFilesFromFileMap(template.tests);
-    this.tests.setActiveFileId(this.tests.entrypoint?.id || null);
+    if (this.tests.entrypoint) this.tests.openFile(this.tests.entrypoint);
+  }
+
+  dispose() {
+    this.emulator.container.teardown();
   }
 }

@@ -10,7 +10,7 @@ export const files = {
           import os from 'os';
           import path from 'path';
   
-          const DEBUG = false
+          const DEBUG = true
   
           const printDir = (dir) => cp.spawnSync('ls', ['-a'], { cwd: dir, stdio: DEBUG ? 'inherit' : null });
           function printFile(filePath) {
@@ -60,10 +60,11 @@ export const files = {
                           },
                         }
                       )
-                      .then((res) => res.json())
-                      .then((data) => {
+                      .then(async (res) => {
+                        data = await res.json()
                         window.parent.postMessage({
                           requestId: event.data.requestId, 
+                          ok: res.ok,
                           body: data 
                         }, "*")
                       })
@@ -78,46 +79,90 @@ export const files = {
             \`);
           });
     
-           function readIntoMemory(dir, baseDir = dir, obj = {}) {
-              const files = fs.readdirSync(dir);
-          
-              files.forEach(file => {
-                  const filePath = path.join(dir, file);
-                  const relativePath = \`/\${path.relative(baseDir, filePath)}\`;
-                  const stats = fs.statSync(filePath);
-          
-                  if (stats.isDirectory()) {
+          function readIntoMemory(dir, baseDir = dir, obj = {}) {
+            const files = fs.readdirSync(dir);
+        
+            files.forEach(file => {
+                const filePath = path.join(dir, file);
+                let relativePath = path.relative(baseDir, filePath);
+        
+                // Remove the leading slash (if any) from the relative path
+                relativePath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+        
+                const stats = fs.statSync(filePath);
+        
+                if (stats.isDirectory()) {
                     readIntoMemory(filePath, baseDir, obj);
-                  } else {
-                      const fileContents = fs.readFileSync(filePath, 'utf8');
-                      obj[relativePath] = { code: fileContents };
-                  }
-              });
-          
-              return obj;
-          }
+                } else {
+                    const fileContents = fs.readFileSync(filePath, 'utf8');
+                    obj[relativePath] = { code: fileContents };
+                }
+            });
+        
+            return obj;
+        }
 
-
-            function readDeclarationFiles(dir, baseDir = dir, obj = {}) {
-                const files = fs.readdirSync(dir);
-
-                files.forEach(file => {
-                    const filePath = path.join(dir, file);
-                    const relativePath = \`/\${path.relative(baseDir, filePath)}\`;
-                    const stats = fs.statSync(filePath);
-
-                    if (stats.isDirectory()) {
-                        readDeclarationFiles(filePath, baseDir, obj);
-                    } else {
-                        if (path.extname(file) === '.ts' && file.endsWith('.d.ts')) {
-                            const fileContents = fs.readFileSync(filePath, 'utf8');
-                            obj[relativePath] = { code: fileContents };
-                        }
-                    }
-                });
-
-                return obj;
+        function findRootDeclarationFile(baseDir, packageName) {
+            let declarationFilePath = getDeclarationFilePath(baseDir, packageName);
+        
+            // Fallback to @types directory for community-provided types
+            if (!declarationFilePath) {
+                declarationFilePath = getDeclarationFilePath(baseDir, \`@types/\${packageName}\`);
             }
+        
+            if (declarationFilePath) {
+                return {
+                    path: path.relative(baseDir, declarationFilePath),
+                    contents: fs.readFileSync(declarationFilePath, 'utf8')
+                };
+            }
+        
+            return null;
+        }
+        
+        function getDeclarationFilePath(baseDir, packageName) {
+            const depPath = path.join(baseDir, 'node_modules', packageName);
+            const depPackageJsonPath = path.join(depPath, 'package.json');
+        
+            if (fs.existsSync(depPackageJsonPath)) {
+                const depPackageJson = JSON.parse(fs.readFileSync(depPackageJsonPath, 'utf8'));
+                const mainFile = depPackageJson.types || depPackageJson.typings || 'index.d.ts';
+                const declarationFilePath = path.join(depPath, mainFile);
+        
+                if (fs.existsSync(declarationFilePath)) {
+                    return declarationFilePath;
+                }
+            }
+        
+            return null;
+        }
+
+
+        function readDeclarationFiles(dir, baseDir = dir, obj = {}) {
+            const files = fs.readdirSync(dir);
+        
+            files.forEach(file => {
+                const filePath = path.join(dir, file);
+                let relativePath = path.relative(baseDir, filePath);
+        
+                // Remove the leading slash (if any) from the relative path
+                relativePath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+        
+                const stats = fs.statSync(filePath);
+        
+                if (stats.isDirectory()) {
+                    readDeclarationFiles(filePath, baseDir, obj);
+                } else {
+                    if (path.extname(file) === '.ts' && file.endsWith('.d.ts') || file.includes('package.json') || file.includes('package-lock.json')) {
+                        const fileContents = fs.readFileSync(filePath, 'utf8');
+                        obj[relativePath] = { code: fileContents };
+                    }
+                }
+            });
+        
+            return obj;
+        }
+        
 
     
           app.post('/library/files', async (req, res) => {           
@@ -157,11 +202,11 @@ export const files = {
         });
     
     
-        app.post('/library/build', async (req, res) => {   
-            const distDir = path.join(libraryDir, 'dist')
-     
+        app.post('/library/build', async (req, res) => {
+            const distDir = path.join(libraryDir, 'dist');
+        
             if (!fs.existsSync(distDir)) {
-               fs.mkdirSync(distDir);
+                fs.mkdirSync(distDir);
             }
         
             try {
@@ -175,23 +220,36 @@ export const files = {
                     return res.status(400).send({ error: 'Main entry point not specified in package.json' });
                 }
         
-                // Determine the entry point for esbuild
                 const entryPoint = path.join(libraryDir, packageJson.main);
-    
-                const buildResult = cp.spawnSync('npm', ['run', 'build'], { cwd: libraryDir, stdio: DEBUG ? 'inherit' : null });
-                if (buildResult.error) {
-                    throw result.error;
-                }
-                const packResult = cp.spawnSync('npm', ['pack', '--pack-destination', cwd], { cwd: distDir, stdio: DEBUG ? 'inherit' : null });
-  
-                const packedFileName = packageJson.name + "-" + packageJson.version + ".tgz"
-                const outputFiles = readIntoMemory(distDir)
+                const buildResult = cp.spawnSync('npm', ['run', 'build'], { cwd: libraryDir });
         
-                res.send({ files: outputFiles, packageId: path.join(cwd, packedFileName) });
+                if (buildResult.error) {
+                    throw buildResult.error;
+                }
+                if (buildResult.status !== 0) {
+                    return res.status(500).send({
+                        error: 'Build failed',
+                        details: buildResult.stderr.toString()
+                    });
+                }
+        
+                const packResult = cp.spawnSync('npm', ['pack', '--pack-destination', libraryDir], { cwd: distDir, stdio: DEBUG ? 'inherit' : 'pipe' });
+                if (packResult.status !== 0) {
+                    return res.status(500).send({
+                        error: 'Packaging failed',
+                        details: packResult.stderr.toString()
+                    });
+                }
+        
+                const packedFileName = packageJson.name + "-" + packageJson.version + ".tgz";
+                const outputFiles = readIntoMemory(distDir);
+        
+                res.send({ files: outputFiles, packageId: path.join(libraryDir, packedFileName) });
             } catch (error) {
                 res.status(500).send({ error: 'Bundling failed', details: error.message });
             }
         });
+        
 
         app.get('/library/declarations/:packageName', async (req, res) => {
             const packageName = req.params.packageName;
@@ -209,12 +267,44 @@ export const files = {
         
                 const declarationFiles = readDeclarationFiles(packagePath);
         
-                // Read the package.json file without parsing it
-                const packageJsonPath = path.join(packagePath, 'package.json');
-                if (fs.existsSync(packageJsonPath)) {
-                    const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                    const relativePath = \`/\${path.relative(packagePath, packageJsonPath)}\`;
-                    declarationFiles[relativePath] = { code: packageJsonContents };
+                res.json(declarationFiles);
+            } catch (error) {
+                res.status(500).send({ error: 'Error processing request', details: error.message });
+            }
+        });
+
+        app.get('/library/declarations', async (req, res) => {
+            try {
+                const nodeModulesPath = path.join(libraryDir, 'node_modules');
+        
+                if (!fs.existsSync(nodeModulesPath)) {
+                    return res.status(404).send({ error: 'node_modules not found' });
+                }
+        
+                const declarationFiles = readDeclarationFiles(nodeModulesPath);
+        
+                res.json(declarationFiles);
+            } catch (error) {
+                res.status(500).send({ error: 'Error processing request', details: error.message });
+            }
+        });
+
+        app.get('/library/imports', async (req, res) => {
+            try {
+                const packageJsonPath = path.join(libraryDir, 'package.json');
+                
+                if (!fs.existsSync(packageJsonPath)) {
+                    return res.status(404).send({ error: 'package.json not found' });
+                }
+        
+                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+                const declarationFiles = {};
+        
+                for (const [dep, version] of Object.entries(dependencies)) {
+                    const declarationInfo = findRootDeclarationFile(libraryDir, dep);
+                    
+                    declarationFiles[dep] = declarationInfo || null;
                 }
         
                 res.json(declarationFiles);
@@ -222,7 +312,7 @@ export const files = {
                 res.status(500).send({ error: 'Error processing request', details: error.message });
             }
         });
-  
+        
         app.post('/example/files', async (req, res) => {     
           let packageJsonUpdated = false;
       
@@ -268,27 +358,6 @@ export const files = {
           }
       });
 
-      app.get('/example/package', async (req, res) => {
-        const packagePath = req.query.path;
-        if (!packagePath) {
-            return res.status(400).send({ error: 'No path provided' });
-        }
-    
-        try {
-            const decodedPath = decodeURIComponent(packagePath);
-    
-            const filePath = path.join(exampleDir, 'node_modules', decodedPath);
-            if (!fs.existsSync(filePath)) {
-                return res.status(404).send({ error: 'File not found' });
-            }
-    
-            const fileContents = fs.readFileSync(filePath, 'utf8');
-            res.json({ contents: fileContents });
-        } catch (error) {
-            res.status(500).send({ error: 'Error processing request', details: error.message });
-        }
-    });
-
 
     app.get('/example/declarations/:packageName', async (req, res) => {
         const packageName = req.params.packageName;
@@ -306,13 +375,21 @@ export const files = {
     
             const declarationFiles = readDeclarationFiles(packagePath);
     
-            // Read the package.json file without parsing it
-            const packageJsonPath = path.join(packagePath, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                const relativePath = \`/\${path.relative(packagePath, packageJsonPath)}\`;
-                declarationFiles[relativePath] = { code: packageJsonContents };
+            res.json(declarationFiles);
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
+
+    app.get('/example/declarations', async (req, res) => {
+        try {
+            const nodeModulesPath = path.join(exampleDir, 'node_modules');
+    
+            if (!fs.existsSync(nodeModulesPath)) {
+                return res.status(404).send({ error: 'node_modules not found' });
             }
+    
+            const declarationFiles = readDeclarationFiles(nodeModulesPath);
     
             res.json(declarationFiles);
         } catch (error) {
@@ -381,13 +458,22 @@ export const files = {
     
             const declarationFiles = readDeclarationFiles(packagePath);
     
-            // Read the package.json file without parsing it
-            const packageJsonPath = path.join(packagePath, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJsonContents = fs.readFileSync(packageJsonPath, 'utf8');
-                const relativePath = \`/\${path.relative(packagePath, packageJsonPath)}\`;
-                declarationFiles[relativePath] = { code: packageJsonContents };
+            res.json(declarationFiles);
+        } catch (error) {
+            res.status(500).send({ error: 'Error processing request', details: error.message });
+        }
+    });
+
+
+    app.get('/tests/declarations', async (req, res) => {
+        try {
+            const nodeModulesPath = path.join(testsDir, 'node_modules');
+    
+            if (!fs.existsSync(nodeModulesPath)) {
+                return res.status(404).send({ error: 'node_modules not found' });
             }
+    
+            const declarationFiles = readDeclarationFiles(nodeModulesPath);
     
             res.json(declarationFiles);
         } catch (error) {

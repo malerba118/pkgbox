@@ -2,14 +2,13 @@ import { action, makeObservable, observable } from "mobx";
 import { Emulator, EmulatorFiles } from "./emulator";
 import { InitializationStatus, Runner } from "./runner";
 import EventEmitter from "eventemitter3";
-import { Subscriber } from "../types";
+import { AsyncStatus, FileMap, Subscriber } from "../types";
 import { debounce } from "lodash";
-import { createAsyncQueue } from "../../lib/async";
-import { toast } from "sonner";
 
 export interface BuildResult {
   packageId: string;
   buildCount: number;
+  files?: FileMap;
 }
 
 enum ServerStatus {
@@ -22,18 +21,22 @@ enum ServerStatus {
 export class LibraryRunner extends Runner {
   events = new EventEmitter();
   buildCount = 0;
+  buildStatus = AsyncStatus.Idle;
 
   constructor(emulator: Emulator) {
     super(emulator);
+    makeObservable(this, {
+      buildStatus: observable.ref,
+      setBuildStatus: action,
+    });
   }
 
   debounced = {
     updateFilesAndBuild: debounce((files: EmulatorFiles) => {
-      toast("Building", { position: "bottom-left", duration: 2000 });
       this.updateFiles(files).then(() => {
         this.build();
       });
-    }, 1000),
+    }, 0),
   };
 
   init = async (files: EmulatorFiles) => {
@@ -45,16 +48,33 @@ export class LibraryRunner extends Runner {
     return result;
   };
 
-  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+  updateFiles = async (files: EmulatorFiles) => {
     console.log("Updating library files");
     return this.emulator.post("/library/files", files);
-  });
+  };
 
-  build = this.AsyncQueue.Fn(async (): Promise<BuildResult> => {
-    const result = await this.emulator.post("/library/build");
-    this.buildCount++;
-    this.events.emit("build", { ...result, buildCount: this.buildCount });
-    return result;
+  setBuildStatus(status: AsyncStatus) {
+    this.buildStatus = status;
+  }
+
+  build = this.emulator.AsyncQueue.Fn(async (): Promise<BuildResult> => {
+    this.setBuildStatus(AsyncStatus.Pending);
+    try {
+      const result = await this.emulator.post("/library/build");
+      this.setBuildStatus(AsyncStatus.Success);
+      this.buildCount++;
+      this.events.emit("build", { ...result, buildCount: this.buildCount });
+      return result;
+    } catch (err) {
+      this.setBuildStatus(AsyncStatus.Error);
+      throw err;
+    }
+    // const result = await this.emulator.post("/library/build");
+    // if (result.error) {
+    //   this.setBuildStatus(AsyncStatus.Error);
+    // } else {
+    //   this.setBuildStatus(AsyncStatus.Success);
+    // }
   });
 
   onBuild = (subscriber: Subscriber<BuildResult>) => {

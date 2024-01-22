@@ -1,12 +1,14 @@
 import { SpawnOptions, WebContainer } from "@webcontainer/api";
 import { files } from "./emulator-files";
 import { nanoid } from "nanoid";
+import { createAsyncQueue } from "../../lib/async";
 
 export type EmulatorFiles = Record<string, { code: string }>;
 
 export class Emulator {
   container: WebContainer;
   iframe: HTMLIFrameElement;
+  AsyncQueue = createAsyncQueue();
 
   private constructor(container: WebContainer) {
     this.container = container;
@@ -17,13 +19,13 @@ export class Emulator {
 
   run = async (command: string, args: string[], options?: SpawnOptions) => {
     const process = await this.container.spawn(command, args, options);
-    // process.output.pipeTo(
-    //   new WritableStream({
-    //     write(data) {
-    //       console.log(data);
-    //     },
-    //   })
-    // );
+    process.output.pipeTo(
+      new WritableStream({
+        write(data) {
+          console.log(data);
+        },
+      })
+    );
     return process;
   };
 
@@ -74,10 +76,14 @@ export class Emulator {
       { requestId, method: "POST", url, body },
       "*"
     );
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const listener = (event: any) => {
         if (event.data?.requestId === requestId) {
-          resolve(event.data.body);
+          if (event.data.ok) {
+            resolve(event.data.body);
+          } else {
+            reject(event.data.body);
+          }
           window.removeEventListener("message", listener);
         }
       };
@@ -91,10 +97,14 @@ export class Emulator {
       { requestId, method: "GET", url },
       "*"
     );
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const listener = (event: any) => {
         if (event.data?.requestId === requestId) {
-          resolve(event.data.body);
+          if (event.data.ok) {
+            resolve(event.data.body);
+          } else {
+            reject(event.data.body);
+          }
           window.removeEventListener("message", listener);
         }
       };

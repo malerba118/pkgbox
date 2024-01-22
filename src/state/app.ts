@@ -16,6 +16,7 @@ export abstract class AppManager {
   foldersById: Record<string, FolderManager> = {};
   project: ProjectManager;
   activeFileId: string | null = null;
+  tabIds: string[] = [];
 
   abstract get app_id(): "library" | "tests" | "example";
 
@@ -33,26 +34,58 @@ export abstract class AppManager {
         // @ts-ignore
         app_id: this.app_id,
         project_id: this.project.id,
-        name: "",
+        // @ts-ignore
+        name: this.app_id,
         folder_id: null,
+        expanded: true,
       },
       this
     );
     makeObservable(this, {
       filesById: observable.shallow,
       foldersById: observable.shallow,
+      tabIds: observable.shallow,
       files: computed,
       folders: computed,
       nodes: computed,
+      typescriptConfig: computed({ keepAlive: true }),
       activeFileId: observable.ref,
       setActiveFileId: action,
       createFileFromPath: action,
       createFilesFromFileMap: action,
+      openFile: action,
+      closeFile: action,
     });
   }
 
+  openFile(file: FileManager) {
+    if (!this.tabIds.includes(file.id)) {
+      this.tabIds = [file.id, ...this.tabIds];
+    }
+    this.setActiveFileId(file.id);
+  }
+
+  closeFile(file: FileManager) {
+    const fileIndex = this.tabIds.findIndex((fileId) => fileId === file.id);
+    this.tabIds = this.tabIds.filter((fileId) => fileId !== file.id);
+    if (this.activeFileId === file.id) {
+      this.setActiveFileId(
+        this.tabIds[fileIndex] || this.tabIds[fileIndex - 1] || null
+      );
+    }
+  }
+
+  get tabs() {
+    return this.tabIds.map((fileId) => this.filesById[fileId]);
+  }
+
+  setActiveFileId(fileId: string | null) {
+    this.activeFile?.save();
+    this.activeFileId = fileId;
+  }
+
   get activeFile() {
-    return this.activeFileId ? this.filesById[this.activeFileId] : null;
+    return this.activeFileId ? this.filesById[this.activeFileId] || null : null;
   }
 
   get entrypoint(): FileManager | null {
@@ -62,19 +95,17 @@ export abstract class AppManager {
     //   : this.files[0];
     const rootFiles = this.files.filter((file) => file.folder_id === "root");
     return (
-      rootFiles.find(
-        (file) =>
-          file.name.includes("index") ||
-          file.name.includes("app") ||
-          file.name.includes("main")
-      ) ||
+      rootFiles.find((file) => {
+        const fileName = file.name.toLowerCase();
+        return (
+          fileName.includes("app") ||
+          fileName.includes("main") ||
+          fileName.includes("index")
+        );
+      }) ||
       rootFiles[0] ||
       null
     );
-  }
-
-  setActiveFileId(fileId: string | null) {
-    this.activeFileId = fileId;
   }
 
   createFile({
@@ -145,9 +176,13 @@ export abstract class AppManager {
   createFileFromPath({
     path,
     contents = "",
+    hidden,
+    read_only,
   }: {
     path: string;
     contents?: string;
+    hidden?: boolean;
+    read_only?: boolean;
   }) {
     const parts = path.split("/").filter((part) => part.length > 0); // Split path and filter out empty parts
     let currentFolder = this.root;
@@ -159,7 +194,7 @@ export abstract class AppManager {
       // Check if folder exists, if not, create it
       let folder = currentFolder.children.find((f) => f.name === part);
       if (!folder) {
-        folder = currentFolder.createFolder({ name: part });
+        folder = currentFolder.createFolder({ name: part, read_only, hidden });
       } else if (folder instanceof FileManager) {
         throw new Error(
           "Cannot create folder because file already exists with this name"
@@ -170,17 +205,37 @@ export abstract class AppManager {
       currentFolder = folder;
     }
 
-    // Create file in the final directory
-    const fileName = parts.at(-1)!; // Get the file name, which is the last part of the path
-    currentFolder.createFile({
-      name: fileName,
-      contents,
-    });
+    // Get the file name, which is the last part of the path
+    const fileName = parts.at(-1)!;
+
+    // Check if a file with the same name already exists
+    const existingFile = currentFolder.children.find(
+      (f) => f.name === fileName && f instanceof FileManager
+    ) as FileManager;
+
+    if (existingFile) {
+      // If file exists, update its contents
+      existingFile.setContents(contents);
+    } else {
+      // If file does not exist, create it
+      currentFolder.createFile({
+        name: fileName,
+        contents,
+        read_only,
+        hidden,
+      });
+    }
   }
 
-  toFileMap() {
+  toFileMap({ exclude = [] }: { exclude?: string[] } = {}) {
     const fileMap: FileMap = {};
     this.files.forEach((file) => {
+      if (
+        exclude.length &&
+        exclude.some((excludePath) => file.path.startsWith(excludePath))
+      ) {
+        return;
+      }
       fileMap[file.path] = {
         code: file.contents,
       };

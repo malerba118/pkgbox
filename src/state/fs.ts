@@ -29,33 +29,82 @@ export class NodeManager {
   }
 
   get path(): string {
-    if (this.folder) {
+    if (this.folder && this.folder.id !== "root") {
       return `${this.folder.path}/${this.name}`;
     }
     return this.name;
+  }
+
+  get pathLength(): number {
+    let length = 1;
+    let folder = this.folder;
+    while (folder) {
+      length += 1;
+      folder = folder.folder;
+    }
+    return length;
   }
 }
 
 export class FileManager extends NodeManager {
   contents: string;
+  draftContents: string;
 
   constructor(data: AppFile, app: AppManager) {
     super(data, app);
     this.contents = data.contents;
+    this.draftContents = data.contents;
     makeObservable(this, {
       contents: observable.ref,
+      draftContents: observable.ref,
       setContents: action,
+      setDraftContents: action,
     });
+  }
+
+  get isActive() {
+    return this.app.activeFileId === this.id;
   }
 
   setContents(contents: string) {
     this.contents = contents;
+    this.draftContents = contents;
+  }
+
+  setDraftContents(draftContents: string) {
+    this.draftContents = draftContents;
+  }
+
+  save() {
+    this.setContents(this.draftContents);
+  }
+
+  get isDirty() {
+    return this.draftContents !== this.contents;
+  }
+
+  open() {
+    this.app.openFile(this);
+  }
+
+  close() {
+    this.app.closeFile(this);
   }
 }
 
 export class FolderManager extends NodeManager {
+  expanded: boolean;
   constructor(data: AppFolder, app: AppManager) {
     super(data, app);
+    this.expanded = data.expanded ?? false;
+    makeObservable(this, {
+      expanded: observable.ref,
+      setExpanded: action,
+    });
+  }
+
+  setExpanded(expanded: boolean) {
+    this.expanded = expanded;
   }
 
   createFolder(data: { name: string; hidden?: boolean; read_only?: boolean }) {

@@ -1,0 +1,24 @@
+{
+  "name": "<PACKAGE_NAME_PLACEHOLDER>",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "dependencies": {
+    "style-inject": "^0.3.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "esbuild": "latest",
+    "rollup": "latest",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-esbuild": "latest",
+    "rollup-plugin-postcss": "latest"
+  }
+}
