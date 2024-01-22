@@ -51,32 +51,30 @@ export class TestsRunner extends Runner {
     this.setInitializationStatus(InitializationStatus.Initialized);
   };
 
-  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+  updateFiles = async (files: EmulatorFiles) => {
     console.log("Updating tests files");
     return this.emulator.post("/tests/files", files);
-  });
+  };
 
-  install = this.AsyncQueue.Fn(
-    async (
-      dependencies: string[] = [],
-      options: InstallOptions = { force: false }
-    ) => {
-      console.log("Install tests dependencies");
-      this.installProcess?.kill();
-      this.installProcess = await this.emulator.run("npm", [
-        "--prefix",
-        ".tests",
-        "install",
-        "--no-audit",
-        "--no-fund",
-        "--no-progress",
-        // "--no-package-lock",
-        ...dependencies,
-      ]);
-      return this.installProcess.exit;
-      // return this.emulator.post("/tests/install", { dependencies, options });
-    }
-  );
+  install = async (
+    dependencies: string[] = [],
+    options: InstallOptions = { force: false }
+  ) => {
+    console.log("Install tests dependencies");
+    this.installProcess?.kill();
+    this.installProcess = await this.emulator.run("npm", [
+      "--prefix",
+      ".tests",
+      "install",
+      "--no-audit",
+      "--no-fund",
+      "--no-progress",
+      // "--no-package-lock",
+      ...dependencies,
+    ]);
+    return this.installProcess.exit;
+    // return this.emulator.post("/tests/install", { dependencies, options });
+  };
 
   start = async () => {
     await this.initialization;

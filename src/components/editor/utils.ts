@@ -2,21 +2,21 @@ import { Monaco } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 
 export const DEFAULT_COMPILER_OPTIONS = {
-  target: monaco.languages.typescript.ScriptTarget.Latest,
-  allowNonTsExtensions: true,
-  resolveJsonModule: true,
-  moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-  module: monaco.languages.typescript.ModuleKind.CommonJS,
-  typeRoots: ["node_modules/@types"],
-  allowSyntheticDefaultImports: true,
-  allowJs: true,
-  strict: true,
-  noImplicitAny: false,
-  allowImportingTsExtensions: true,
-  noEmit: true,
-  esModuleInterop: true,
-  jsx: monaco.languages.typescript.JsxEmit.Preserve,
-  reactNamespace: "React",
+  //   target: monaco.languages.typescript.ScriptTarget.Latest,
+  //   allowNonTsExtensions: true,
+  //   resolveJsonModule: true,
+  //   moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+  //   module: monaco.languages.typescript.ModuleKind.CommonJS,
+  //   typeRoots: ["node_modules/@types"],
+  //   allowSyntheticDefaultImports: true,
+  //   allowJs: true,
+  //   strict: true,
+  //   noImplicitAny: false,
+  //   allowImportingTsExtensions: true,
+  //   noEmit: true,
+  //   esModuleInterop: true,
+  //   jsx: monaco.languages.typescript.JsxEmit.Preserve,
+  //   reactNamespace: "React",
 };
 
 type CompilerOptions = ReturnType<
@@ -32,7 +32,6 @@ export const tsConfigToCompilerOptions = (
     target: mapTarget(compilerOptions?.target),
     module: mapModule(compilerOptions?.module),
     moduleResolution: mapModuleResolution(compilerOptions?.moduleResolution),
-    allowJs: true,
   };
 };
 

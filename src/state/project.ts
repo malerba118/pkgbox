@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { TemplateOptions, getTemplate } from "../templates";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
+import { createAsyncQueue } from "../lib/async";
 
 export class ProjectManager {
   id: string;
@@ -81,7 +82,7 @@ export class ProjectManager {
       setActivePreview: action,
       createFilesFromTemplate: action,
     });
-    this.library.runner.onBuild(async (result) => {
+    const afterBuild = this.emulator.AsyncQueue.Fn(async (result) => {
       if (this.activePreview === "example") {
         if (result.buildCount > 1)
           await this.example.runner.install([result.packageId]);
@@ -99,6 +100,7 @@ export class ProjectManager {
         // await this.example.runner.startServer();
       }
     });
+    this.library.runner.onBuild(afterBuild);
     reaction(
       () => this.activePreview,
       () => {

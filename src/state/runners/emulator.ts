@@ -1,12 +1,14 @@
 import { SpawnOptions, WebContainer } from "@webcontainer/api";
 import { files } from "./emulator-files";
 import { nanoid } from "nanoid";
+import { createAsyncQueue } from "../../lib/async";
 
 export type EmulatorFiles = Record<string, { code: string }>;
 
 export class Emulator {
   container: WebContainer;
   iframe: HTMLIFrameElement;
+  AsyncQueue = createAsyncQueue();
 
   private constructor(container: WebContainer) {
     this.container = container;

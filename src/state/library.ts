@@ -37,8 +37,6 @@ export class LibraryManager extends AppManager {
           });
         });
       }
-
-      console.log(result);
       // this.createFilesFromFileMap(result.)
     });
   }

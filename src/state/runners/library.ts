@@ -4,7 +4,6 @@ import { InitializationStatus, Runner } from "./runner";
 import EventEmitter from "eventemitter3";
 import { AsyncStatus, FileMap, Subscriber } from "../types";
 import { debounce } from "lodash";
-import { createAsyncQueue } from "../../lib/async";
 
 export interface BuildResult {
   packageId: string;
@@ -49,16 +48,16 @@ export class LibraryRunner extends Runner {
     return result;
   };
 
-  updateFiles = this.AsyncQueue.Fn(async (files: EmulatorFiles) => {
+  updateFiles = async (files: EmulatorFiles) => {
     console.log("Updating library files");
     return this.emulator.post("/library/files", files);
-  });
+  };
 
   setBuildStatus(status: AsyncStatus) {
     this.buildStatus = status;
   }
 
-  build = this.AsyncQueue.Fn(async (): Promise<BuildResult> => {
+  build = this.emulator.AsyncQueue.Fn(async (): Promise<BuildResult> => {
     this.setBuildStatus(AsyncStatus.Pending);
     try {
       const result = await this.emulator.post("/library/build");
