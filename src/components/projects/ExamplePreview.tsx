@@ -36,6 +36,7 @@ const Browser = ({ defaultUrl }: { defaultUrl: string }) => {
         <Input
           h={7}
           flex={1}
+          px={3}
           rounded="full"
           bg="layer-0"
           defaultValue={defaultUrl}
@@ -44,7 +45,7 @@ const Browser = ({ defaultUrl }: { defaultUrl: string }) => {
               iframeRef.current.src = e.currentTarget.value;
             }
           }}
-          fontSize="sm"
+          fontSize="xs"
           border="subtle"
         />
       </HStack>
