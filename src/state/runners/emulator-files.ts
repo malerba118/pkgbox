@@ -229,7 +229,10 @@ export const files = {
                 if (buildResult.status !== 0) {
                     return res.status(500).send({
                         error: 'Build failed',
-                        details: buildResult.stderr.toString()
+                        logs: {
+                            stdout: buildResult.stdout.toString(),
+                            stderr: buildResult.stderr.toString() 
+                         }
                     });
                 }
         
@@ -237,14 +240,26 @@ export const files = {
                 if (packResult.status !== 0) {
                     return res.status(500).send({
                         error: 'Packaging failed',
-                        details: packResult.stderr.toString()
+                        logs: {
+                            stdout: packResult.stdout.toString(),
+                            stderr: packResult.stderr.toString() 
+                         }
                     });
                 }
         
                 const packedFileName = packageJson.name + "-" + packageJson.version + ".tgz";
                 const outputFiles = readIntoMemory(distDir);
+
+                console.log(buildResult)
         
-                res.send({ files: outputFiles, packageId: path.join(libraryDir, packedFileName) });
+                res.send({ 
+                    files: outputFiles, 
+                    packageId: path.join(libraryDir, packedFileName), 
+                    logs: {
+                       stdout: buildResult.stdout.toString(),
+                       stderr: buildResult.stderr.toString() 
+                    }
+                });
             } catch (error) {
                 res.status(500).send({ error: 'Bundling failed', details: error.message });
             }

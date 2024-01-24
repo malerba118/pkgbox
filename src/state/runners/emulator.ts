@@ -66,6 +66,7 @@ export class Emulator {
     const instance = new this(container);
     await instance.installDeps();
     const { url } = await instance.startServer();
+    console.log(url);
     await instance.setIframeUrl(url);
     return instance;
   };

@@ -8,6 +8,13 @@ import { debounce } from "lodash";
 export interface BuildResult {
   packageId: string;
   buildCount: number;
+  logs?: {
+    stdout: string;
+    stderr: string;
+  };
+  error?: {
+    details: string;
+  };
   files?: FileMap;
 }
 
@@ -63,11 +70,19 @@ export class LibraryRunner extends Runner {
       const result = await this.emulator.post("/library/build");
       this.setBuildStatus(AsyncStatus.Success);
       this.buildCount++;
-      this.events.emit("build", { ...result, buildCount: this.buildCount });
+      this.events.emit("build", {
+        ...result,
+        buildCount: this.buildCount,
+      });
       return result;
-    } catch (err) {
+    } catch (result: any) {
       this.setBuildStatus(AsyncStatus.Error);
-      throw err;
+      this.buildCount++;
+      this.events.emit("build", {
+        ...result,
+        buildCount: this.buildCount,
+      });
+      throw result;
     }
     // const result = await this.emulator.post("/library/build");
     // if (result.error) {

@@ -9,7 +9,6 @@ export const DEFAULT_COMPILER_OPTIONS = {
   //   module: monaco.languages.typescript.ModuleKind.CommonJS,
   //   typeRoots: ["node_modules/@types"],
   //   allowSyntheticDefaultImports: true,
-  //   allowJs: true,
   //   strict: true,
   //   noImplicitAny: false,
   //   allowImportingTsExtensions: true,
@@ -17,6 +16,7 @@ export const DEFAULT_COMPILER_OPTIONS = {
   //   esModuleInterop: true,
   //   jsx: monaco.languages.typescript.JsxEmit.Preserve,
   //   reactNamespace: "React",
+  allowJs: true,
 };
 
 type CompilerOptions = ReturnType<

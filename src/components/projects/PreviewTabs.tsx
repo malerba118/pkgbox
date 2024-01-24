@@ -36,8 +36,12 @@ const PreviewTabs = observer(() => {
             w="50%"
             alignItems="center"
             _last={{ borderRight: "none" }}
+            _selected={{
+              color: "text-vivid",
+              bg: "layer-1",
+            }}
           >
-            <chakra.span mb="1px" textTransform="capitalize" fontWeight="bold">
+            <chakra.span mb="1px" textTransform="capitalize">
               {tab}
             </chakra.span>
           </Tab>

@@ -5,9 +5,12 @@ import { LibraryRunner } from "./runners/library";
 import { debounce } from "lodash";
 import { reaction } from "mobx";
 import { InitializationStatus } from "./runners/runner";
+import { Terminal } from "xterm";
+import { TerminalManager } from "./terminal";
 
 export class LibraryManager extends AppManager {
   runner: LibraryRunner;
+  terminal = new TerminalManager();
 
   constructor(data: App, project: ProjectManager) {
     super(data, project);
@@ -28,6 +31,11 @@ export class LibraryManager extends AppManager {
       }
     );
     this.runner.onBuild((result) => {
+      if (result.logs) {
+        this.terminal.reset();
+        this.terminal.write(result.logs.stdout);
+        this.terminal.write(result.logs.stderr);
+      }
       if (result.files) {
         Object.keys(result.files).forEach((filePath) => {
           this.createFileFromPath({

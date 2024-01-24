@@ -9,6 +9,7 @@ import { TemplateOptions, getTemplate } from "../templates";
 import { LibraryTemplateType } from "../templates/library";
 import { ExampleTemplateType } from "../templates/example";
 import { createAsyncQueue } from "../lib/async";
+import { BuildResult } from "./runners/library";
 
 export class ProjectManager {
   id: string;
@@ -82,24 +83,27 @@ export class ProjectManager {
       setActivePreview: action,
       createFilesFromTemplate: action,
     });
-    const afterBuild = this.emulator.AsyncQueue.Fn(async (result) => {
-      if (this.activePreview === "example") {
-        if (result.buildCount > 1)
-          await this.example.runner.install([result.packageId]);
-        await this.example.runner.start();
-        if (result.buildCount > 1)
-          await this.tests.runner.install([result.packageId]);
-        // await this.tests.runner.startTests();
-      } else {
-        // reverse the order
-        if (result.buildCount > 1)
-          await this.tests.runner.install([result.packageId]);
-        await this.tests.runner.start();
-        if (result.buildCount > 1)
-          await this.example.runner.install([result.packageId]);
-        // await this.example.runner.startServer();
+    const afterBuild = this.emulator.AsyncQueue.Fn(
+      async (result: BuildResult) => {
+        if (result.error) return;
+        if (this.activePreview === "example") {
+          if (result.buildCount > 1)
+            await this.example.runner.install([result.packageId]);
+          await this.example.runner.start();
+          if (result.buildCount > 1)
+            await this.tests.runner.install([result.packageId]);
+          // await this.tests.runner.startTests();
+        } else {
+          // reverse the order
+          if (result.buildCount > 1)
+            await this.tests.runner.install([result.packageId]);
+          await this.tests.runner.start();
+          if (result.buildCount > 1)
+            await this.example.runner.install([result.packageId]);
+          // await this.example.runner.startServer();
+        }
       }
-    });
+    );
     this.library.runner.onBuild(afterBuild);
     reaction(
       () => this.activePreview,
