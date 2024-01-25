@@ -26,8 +26,6 @@ const Terminal = ({ terminal }: { terminal: TerminalManager }) => {
 
   useEffect(() => {
     const terminalEl = document.createElement("div");
-    // terminalEl.style.paddingBlock = "8px";
-    // terminalEl.style.paddingInline = "12px";
     containerRef.current?.appendChild(terminalEl);
     terminal.mount(terminalEl);
     terminal.fitter.fit();
@@ -50,7 +48,7 @@ const Terminal = ({ terminal }: { terminal: TerminalManager }) => {
           ? terminal.themes.dark.background
           : terminal.themes.light.background
       }
-      px="12px"
+      px="16px"
       py="8px"
       ref={containerRef}
     />

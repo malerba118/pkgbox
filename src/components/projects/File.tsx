@@ -3,8 +3,11 @@ import { FileManager } from "../../state/fs";
 import { Button, Text } from "@chakra-ui/react";
 import FileIcon from "../icons/FileIcon";
 import { observer } from "mobx-react";
+import InlineInput from "../InlineInput";
+import { useProject } from "./ProjectProvider";
 
 const File = observer(({ file }: { file: FileManager }) => {
+  const project = useProject();
   return (
     <Button
       fontSize="sm"
@@ -19,11 +22,20 @@ const File = observer(({ file }: { file: FileManager }) => {
       gap={1}
       color="text-normal"
       bg={file.isActive ? "layer-2" : undefined}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        project.menus.fs.open({
+          position: {
+            x: e.clientX,
+            y: e.clientY,
+          },
+          node: file,
+        });
+      }}
     >
       <FileIcon />
-      <Text isTruncated pr="3">
-        {file.name}
-      </Text>
+      <InlineInput defaultValue={file.name} onChange={() => {}} />
     </Button>
   );
 });

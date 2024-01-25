@@ -1,5 +1,5 @@
 import { action, makeObservable, observable, reaction, when } from "mobx";
-import { Project, Template } from "./types";
+import { AppNode, Project, Template } from "./types";
 import { LibraryManager } from "./library";
 import { ExampleManager } from "./example";
 import { Emulator } from "./runners/emulator";
@@ -11,6 +11,37 @@ import { ExampleTemplateType } from "../templates/example";
 import { createAsyncQueue } from "../lib/async";
 import { BuildResult } from "./runners/library";
 
+interface FsMenuContext {
+  node: AppNode;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+class FsMenuManager {
+  isOpen: boolean = false;
+  context: FsMenuContext | null = null;
+
+  constructor() {
+    makeObservable(this, {
+      isOpen: observable.ref,
+      context: observable.ref,
+      open: action,
+      close: action,
+    });
+  }
+
+  open(context: FsMenuContext) {
+    this.isOpen = true;
+    this.context = context;
+  }
+
+  close() {
+    this.isOpen = false;
+  }
+}
+
 export class ProjectManager {
   id: string;
   name: string;
@@ -21,6 +52,9 @@ export class ProjectManager {
   example: ExampleManager;
   tests: TestsManager;
   initCount: number = 0;
+  menus = {
+    fs: new FsMenuManager(),
+  };
 
   constructor(data: Project | TemplateOptions, emulator: Emulator) {
     this.activeAppId = "library";

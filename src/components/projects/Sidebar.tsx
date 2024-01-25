@@ -3,6 +3,7 @@ import { useProject } from "./ProjectProvider";
 import Folder from "./Folder";
 import { observer } from "mobx-react";
 import { Box, HStack, Stack, Text } from "@chakra-ui/react";
+import FsMenu from "./FsMenu";
 
 const Sidebar = observer(() => {
   const project = useProject();
@@ -20,6 +21,7 @@ const Sidebar = observer(() => {
         </HStack>
       </Stack>
       <Box py={1.5}>
+        <FsMenu />
         <Folder folder={project.activeApp.root} />
       </Box>
     </Box>
