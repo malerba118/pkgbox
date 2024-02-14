@@ -9,28 +9,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      window.addEventListener("message", (event) => {
-        console.log("YOYOYOYOYOYOYOYOYO");
-        if (typeof event.data === "object" && event.data.command) {
-          switch (event.data.command) {
-            case "navigation.forward":
-              history.forward();
-              break;
-            case "navigation.backward":
-              history.back();
-              break;
-            case "navigation.refresh":
-              location.reload();
-              break;
-            case "navigation.push":
-              window.location.href = event.data.url;
-              break;
-            default:
-              console.log("Unknown navigation command");
-          }
-        }
-      });
-    </script>
   </body>
 </html>
